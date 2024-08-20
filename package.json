@@ -14,6 +14,7 @@
     "@heroicons/react": "^2.1.5",
     "@reduxjs/toolkit": "^1.9.5",
     "@tinymce/tinymce-react": "^4.3.0",
+    "@welcome-ui/loader": "^5.18.1",
     "appwrite": "^13.0.0",
     "html-react-parser": "^4.2.2",
     "react": "^18.2.0",
