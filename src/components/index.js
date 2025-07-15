@@ -12,6 +12,11 @@ import PostForm from "./post-form/PostForm";
 import PostCard from "./PostCard";
 import AuthLayout from "./AuthLayout";
 import Input from "./Input";
+import DarkModeToggle from "./DarkModeToggle";
+import ScrollToTop from "./ScrollToTop";
+import SearchBar from "./SearchBar";
+import SearchResults from "./SearchResults";
+
 export {
     Header,
     Footer,
@@ -27,4 +32,8 @@ export {
     AuthLayout, 
     Input,
     Select,
+    DarkModeToggle,
+    ScrollToTop,
+    SearchBar,
+    SearchResults,
 }

@@ -1,8 +1,76 @@
-# React + Vite
+# Horizone Travel Blog
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern, adventure-focused travel blog built with React, Tailwind CSS, and Appwrite.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Responsive Design**: Fully responsive design that works on mobile, tablet, and desktop
+- **Dark Mode**: Support for light and dark mode with user preference detection
+- **Animations**: Smooth animations and transitions for a better user experience
+- **Accessibility**: Semantic HTML, keyboard navigation, and ARIA attributes
+- **SEO Optimized**: Meta tags and structured data for better search engine visibility
+- **Performance**: Optimized images, code splitting, and lazy loading
+
+## Design System
+
+The design system is based on the Horizone Travel Design System, which includes:
+
+- **Color Palette**: A carefully crafted color palette for both light and dark modes
+- **Typography**: A consistent typography system using Inter font family
+- **Spacing**: Consistent spacing using a base-8 system
+- **Components**: Reusable components like buttons, cards, and navigation
+- **Animations**: Subtle animations and transitions for a better user experience
+
+## Technologies Used
+
+- **React**: Frontend library for building user interfaces
+- **Tailwind CSS**: Utility-first CSS framework for styling
+- **Appwrite**: Backend as a service for authentication and data storage
+- **React Router**: For routing and navigation
+- **Redux Toolkit**: For state management
+
+## Getting Started
+
+1. Clone the repository
+2. Install dependencies: `npm install`
+3. Start the development server: `npm run dev`
+4. Open [http://localhost:5173](http://localhost:5173) in your browser
+
+## Project Structure
+
+```
+src/
+  ├── appwrite/        # Appwrite configuration and API calls
+  ├── assets/          # Static assets like images and icons
+  ├── components/      # Reusable components
+  ├── conf/            # Configuration files
+  ├── pages/           # Page components
+  ├── store/           # Redux store and slices
+  ├── theme/           # Theme configuration
+  ├── utils/           # Utility functions
+  ├── App.jsx          # Main App component
+  └── main.jsx         # Entry point
+```
+
+## Design Implementation
+
+The design implementation is based on the `design.json` file, which contains the complete visual specifications for the project. The design tokens have been extracted into the Tailwind configuration for consistent usage across the application.
+
+## Accessibility Features
+
+- Semantic HTML elements
+- ARIA attributes for interactive elements
+- Keyboard navigation support
+- Color contrast compliance
+- Screen reader friendly content
+
+## Performance Optimizations
+
+- Lazy loading of images
+- Code splitting for better load times
+- Optimized bundle size
+- Efficient rendering with React
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.

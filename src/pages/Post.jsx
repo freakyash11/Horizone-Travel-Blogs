@@ -41,10 +41,15 @@ export default function Post() {
                         alt={post.title}
                         className="rounded-xl"
                     />
-
-                    
                 </div>
                 <div className="w-full mb-6">
+                    <div className="flex items-center gap-2 mb-2">
+                        {post.category && (
+                            <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">
+                                {post.category}
+                            </span>
+                        )}
+                    </div>
                     <h1 className="text-2xl font-bold">{post.title}</h1>
                     {isAuthor && (
                         <div className=" right-6 top-6">

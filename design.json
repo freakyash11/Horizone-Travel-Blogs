@@ -1,0 +1,246 @@
+{
+    "designSystem": {
+      "name": "Horizone Travel Design System",
+      "version": "1.0.0",
+      "description": "A modern, adventure-focused travel website design system with emphasis on immersive imagery and clean typography"
+    },
+    "colorPalette": {
+      "primary": {
+        "dark": "#1a1a1a",
+        "charcoal": "#2c2c2c",
+        "slate": "#4a5568"
+      },
+      "secondary": {
+        "white": "#ffffff",
+        "lightGray": "#f7fafc",
+        "mediumGray": "#e2e8f0",
+        "darkGray": "#718096"
+      },
+      "accent": {
+        "blue": "#3182ce",
+        "teal": "#319795"
+      },
+      "overlays": {
+        "darkOverlay": "rgba(0, 0, 0, 0.4)",
+        "lightOverlay": "rgba(0, 0, 0, 0.2)"
+      }
+    },
+    "typography": {
+      "fontFamilies": {
+        "primary": "Inter, system-ui, -apple-system, sans-serif",
+        "secondary": "SF Pro Display, Helvetica Neue, sans-serif"
+      },
+      "fontSizes": {
+        "xs": "0.75rem",
+        "sm": "0.875rem",
+        "base": "1rem",
+        "lg": "1.125rem",
+        "xl": "1.25rem",
+        "2xl": "1.5rem",
+        "3xl": "1.875rem",
+        "4xl": "2.25rem",
+        "5xl": "3rem"
+      },
+      "fontWeights": {
+        "light": 300,
+        "regular": 400,
+        "medium": 500,
+        "semibold": 600,
+        "bold": 700
+      },
+      "lineHeights": {
+        "tight": 1.2,
+        "normal": 1.5,
+        "relaxed": 1.6
+      }
+    },
+    "spacing": {
+      "xs": "0.25rem",
+      "sm": "0.5rem",
+      "md": "1rem",
+      "lg": "1.5rem",
+      "xl": "2rem",
+      "2xl": "3rem",
+      "3xl": "4rem",
+      "4xl": "6rem",
+      "5xl": "8rem"
+    },
+    "borderRadius": {
+      "sm": "0.125rem",
+      "md": "0.375rem",
+      "lg": "0.5rem",
+      "xl": "0.75rem",
+      "2xl": "1rem",
+      "full": "9999px"
+    },
+    "shadows": {
+      "sm": "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+      "md": "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+      "lg": "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
+      "xl": "0 20px 25px -5px rgba(0, 0, 0, 0.1)"
+    },
+    "components": {
+      "heroSection": {
+        "structure": "Full-width background image with overlay",
+        "textPlacement": "Center-left or bottom overlay",
+        "overlayType": "Dark gradient overlay (40-60% opacity)",
+        "typography": {
+          "headline": "Large, bold white text (3xl-5xl)",
+          "subtext": "Medium white text with good contrast",
+          "description": "Smaller descriptive text below headline"
+        },
+        "ctaButton": {
+          "style": "White background with dark text",
+          "shape": "Rounded rectangle",
+          "placement": "Below hero text",
+          "icon": "Arrow or directional indicator"
+        }
+      },
+      "navigationHeader": {
+        "structure": "Horizontal navigation with logo left, menu center, actions right",
+        "background": "Transparent overlay or dark background",
+        "logoPlacement": "Top-left corner",
+        "menuItems": "Horizontal list with adequate spacing",
+        "searchBar": "Integrated search input with icon",
+        "userActions": "Login/signup buttons on right",
+        "styling": {
+          "textColor": "White or dark depending on background",
+          "hoverEffects": "Subtle hover states",
+          "spacing": "Generous padding and margins"
+        }
+      },
+      "contentCards": {
+        "structure": "Grid layout with image-first approach",
+        "imageAspectRatio": "Wide rectangle (16:9 or 4:3)",
+        "imageStyle": "High-quality, full-bleed imagery",
+        "textLayout": "Below image with clear hierarchy",
+        "metadata": {
+          "categoryTag": "Small colored pill/badge",
+          "date": "Light gray text",
+          "readTime": "Light gray text with bullet separator",
+          "author": "Small circular avatar with name"
+        },
+        "typography": {
+          "headline": "Bold, dark text (lg-xl)",
+          "excerpt": "Medium gray text, readable line height",
+          "metadata": "Small, light gray text"
+        },
+        "spacing": "Consistent padding around all elements"
+      },
+      "categoryTags": {
+        "style": "Rounded pill badges",
+        "colors": "Muted background colors (gray, blue, green)",
+        "typography": "Small, medium-weight text",
+        "placement": "Top-left overlay on images or above content"
+      },
+      "buttons": {
+        "primary": {
+          "background": "Dark color or brand color",
+          "text": "White",
+          "shape": "Rounded rectangle",
+          "padding": "Generous vertical and horizontal padding",
+          "hoverState": "Subtle color change or shadow"
+        },
+        "secondary": {
+          "background": "White or light gray",
+          "text": "Dark color",
+          "border": "Optional thin border",
+          "shape": "Rounded rectangle"
+        },
+        "icon": "Optional arrow or directional icon"
+      },
+      "footer": {
+        "structure": "Multi-column layout with dark background",
+        "background": "Dark charcoal or black",
+        "textColor": "White and light gray",
+        "sections": {
+          "branding": "Logo and mission statement",
+          "navigation": "Organized link groups",
+          "social": "Social media icons",
+          "newsletter": "Email signup form",
+          "legal": "Copyright and legal links"
+        },
+        "styling": {
+          "columnSpacing": "Adequate spacing between sections",
+          "linkHover": "Subtle hover effects",
+          "socialIcons": "Consistent icon treatment"
+        }
+      },
+      "imageGallery": {
+        "layout": "Masonry or grid layout",
+        "aspectRatios": "Mixed but harmonious ratios",
+        "spacing": "Consistent gaps between images",
+        "hoverEffects": "Subtle zoom or overlay effects",
+        "overlayText": "When present, use high contrast"
+      },
+      "pagination": {
+        "style": "Numbered pagination with arrows",
+        "activeState": "Highlighted current page",
+        "spacing": "Centered with adequate touch targets",
+        "typography": "Clear, readable numbers"
+      }
+    },
+    "layoutPrinciples": {
+      "gridSystem": {
+        "columns": 12,
+        "breakpoints": {
+          "mobile": "320px",
+          "tablet": "768px",
+          "desktop": "1024px",
+          "wide": "1280px"
+        },
+        "gutters": {
+          "mobile": "1rem",
+          "tablet": "1.5rem",
+          "desktop": "2rem"
+        }
+      },
+      "spacing": {
+        "verticalRhythm": "Consistent vertical spacing using 8px base unit",
+        "sectionSpacing": "Large gaps between major sections",
+        "contentSpacing": "Moderate spacing within content blocks"
+      },
+      "imageStrategy": {
+        "quality": "High-resolution, professional imagery",
+        "treatment": "Full-bleed or contained with rounded corners",
+        "aspectRatios": "Consistent within component types",
+        "loading": "Progressive loading with placeholders"
+      }
+    },
+    "interactionPatterns": {
+      "hoverEffects": {
+        "cards": "Subtle lift with shadow increase",
+        "buttons": "Color transition and slight scale",
+        "images": "Gentle zoom or overlay appearance",
+        "links": "Color change or underline appearance"
+      },
+      "transitions": {
+        "duration": "200-300ms",
+        "easing": "ease-in-out",
+        "properties": "transform, opacity, color, box-shadow"
+      },
+      "focusStates": {
+        "style": "Visible focus ring with brand color",
+        "offset": "2px from element",
+        "accessibility": "High contrast for keyboard navigation"
+      }
+    },
+    "contentStrategy": {
+      "imageToTextRatio": "60:40 (image-heavy approach)",
+      "textHierarchy": "Clear headline, subtitle, body text progression",
+      "whitespace": "Generous use of whitespace for breathing room",
+      "readability": "High contrast text with optimal line length"
+    },
+    "responsiveDesign": {
+      "approach": "Mobile-first, progressive enhancement",
+      "breakpointStrategy": "Fluid typography and spacing",
+      "imageHandling": "Responsive images with multiple sources",
+      "navigationPattern": "Hamburger menu on mobile, full nav on desktop"
+    },
+    "brandPersonality": {
+      "tone": "Adventure-focused, premium, authentic",
+      "visualStyle": "Clean, modern, imagery-driven",
+      "userExperience": "Inspirational, easy to navigate, discovery-focused",
+      "contentApproach": "Story-driven, experiential, expert-curated"
+    }
+  }

@@ -7,14 +7,13 @@ import store from './store/store.js'
 import { RouterProvider, createBrowserRouter } from 'react-router-dom'
 import Home from './pages/Home.jsx'
 import { AuthLayout, Login } from './components/index.js'
-
+import { SearchProvider } from './context/SearchContext.jsx'
 
 import AddPost from "./pages/AddPost";
 import Signup from './pages/Signup'
 import EditPost from "./pages/EditPost";
-
+import SearchPage from "./pages/SearchPage";
 import Post from "./pages/Post";
-
 import AllPosts from "./pages/AllPosts";
 
 const router = createBrowserRouter([
@@ -73,6 +72,10 @@ const router = createBrowserRouter([
             path: "/post/:slug",
             element: <Post />,
         },
+        {
+            path: "/search",
+            element: <SearchPage />,
+        },
     ],
 },
 ])
@@ -80,7 +83,9 @@ const router = createBrowserRouter([
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <Provider store={store}>
-    <RouterProvider router={router}/>
+      <SearchProvider>
+        <RouterProvider router={router}/>
+      </SearchProvider>
     </Provider>
   </React.StrictMode>,
 )

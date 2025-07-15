@@ -12,6 +12,7 @@ export default function PostForm({ post }) {
             slug: post?.$id || "",
             content: post?.content || "",
             status: post?.status || "active",
+            category: post?.category || "Destination",
         },
     });
 
@@ -107,6 +108,12 @@ export default function PostForm({ post }) {
                         />
                     </div>
                 )}
+                <Select
+                    options={["Destination", "Culinary", "Lifestyle", "Tips & Hacks"]}
+                    label="Category"
+                    className="mb-4"
+                    {...register("category", { required: true })}
+                />
                 <Select
                     options={["active", "inactive"]}
                     label="Status"
