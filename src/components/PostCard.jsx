@@ -1,8 +1,11 @@
-import React from 'react'
+import React, { useState } from 'react'
 import appwriteService from "../appwrite/config"
 import {Link} from 'react-router-dom'
+import conf from "../conf/conf.js"
 
 function PostCard({$id, title, featuredImage, content, $createdAt, category}) {
+  const [imageError, setImageError] = useState(false);
+  
   // Format date
   const formattedDate = new Date($createdAt).toLocaleDateString('en-US', {
     year: 'numeric',
@@ -15,6 +18,15 @@ function PostCard({$id, title, featuredImage, content, $createdAt, category}) {
   
   // Create excerpt from content
   const excerpt = content ? `${content.substring(0, 120)}${content.length > 120 ? '...' : ''}` : '';
+  
+  // Generate direct URL for image
+  const generateDirectImageUrl = (fileId) => {
+    if (!fileId) return '';
+    return `${conf.appwriteUrl}/storage/buckets/${conf.appwriteBucketId}/files/${fileId}/view?project=${conf.appwriteProjectId}`;
+  };
+  
+  // Get image URL - use direct URL first
+  const imageUrl = featuredImage ? generateDirectImageUrl(featuredImage) : '';
   
   return (
     <Link to={`/post/${$id}`} className="block transition-transform duration-300 hover:scale-[1.02] hover:shadow-lg">
@@ -30,10 +42,22 @@ function PostCard({$id, title, featuredImage, content, $createdAt, category}) {
           {/* Featured Image */}
           <div className='w-full aspect-[16/9] overflow-hidden'>
             <img 
-              src={appwriteService.getFilePreview(featuredImage)} 
+              src={imageUrl} 
               alt={title}
               className='w-full h-full object-cover transition-transform duration-300 hover:scale-105'
               loading="lazy"
+              onError={(e) => {
+                if (!imageError) {
+                  // If direct URL fails, try the appwrite service URL as fallback
+                  setImageError(true);
+                  console.log("Direct image URL failed, trying service URL for:", title);
+                  e.target.src = appwriteService.getFilePreview(featuredImage);
+                } else {
+                  // If both fail, use a placeholder
+                  console.log("Both image URLs failed for:", title);
+                  e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='400' viewBox='0 0 800 400'%3E%3Crect width='800' height='400' fill='%23f0f0f0'/%3E%3Ctext x='400' y='200' font-family='Arial' font-size='32' fill='%23999' text-anchor='middle' dominant-baseline='middle'%3EImage Not Available%3C/text%3E%3C/svg%3E";
+                }
+              }}
             />
           </div>
         </div>

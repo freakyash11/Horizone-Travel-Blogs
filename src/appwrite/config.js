@@ -1,5 +1,6 @@
 import conf from '../conf/conf.js';
 import { Client, ID, Databases, Storage, Query } from "appwrite";
+import { Permission, Role } from 'appwrite';
 
 export class Service{
     client = new Client();
@@ -264,25 +265,21 @@ export class Service{
     async uploadFile(file){
         try {
             console.log("Uploading file:", file.name || "unnamed file");
+            
+            // Upload without permissions first
             const fileUpload = await this.bucket.createFile(
                 conf.appwriteBucketId,
                 ID.unique(),
-                file,
-                ['read("any")'] // Set public read permissions during file creation
+                file
             );
             
-            // Double check that permissions are set correctly
-            try {
-                await this.bucket.updateFile(
-                    conf.appwriteBucketId,
-                    fileUpload.$id,
-                    undefined, // name (keep existing)
-                    ['read("any")'] // Ensure public read access
-                );
-                console.log("Set public read permissions for file:", fileUpload.$id);
-            } catch (permError) {
-                console.error("Failed to set permissions for file:", permError);
-            }
+            // Then update permissions
+            await this.bucket.updateFile(
+                conf.appwriteBucketId,
+                fileUpload.$id,
+                undefined,
+                [Permission.read(Role.any())]
+            );
             
             return fileUpload;
         } catch (error) {

@@ -186,6 +186,76 @@ function Home() {
                     )}
                 </Container>
             </section>
+
+            {/* Featured Experiences Section */}
+            <section className="py-16 bg-white dark:bg-primary-charcoal">
+                <Container>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        {/* Left Column - Comfort Zone Card */}
+                        <div className="relative h-[500px] rounded-lg overflow-hidden shadow-lg" data-animate="slide-up">
+                            <div className="absolute inset-0 bg-primary-dark bg-opacity-80 z-10"></div>
+                            <div className="absolute inset-0 flex flex-col justify-center p-10 z-20">
+                                <div className="mb-4">
+                                    <div className="w-10 h-10 rounded-full bg-secondary-white bg-opacity-20 flex items-center justify-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-secondary-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <h2 className="text-3xl md:text-4xl font-bold text-secondary-white mb-4">
+                                    Explore more to get your comfort zone
+                                </h2>
+                                <p className="text-secondary-mediumGray mb-8">
+                                    Book your perfect stay with us.
+                                </p>
+                                <div>
+                                    <Link 
+                                        to="/destinations" 
+                                        className="inline-flex items-center px-6 py-3 bg-secondary-white text-primary-dark font-medium rounded-lg hover:bg-secondary-mediumGray transition-colors duration-300"
+                                    >
+                                        Booking Now
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                        </svg>
+                                    </Link>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Right Column - Grid */}
+                        <div className="grid grid-cols-1 grid-rows-2 gap-8 h-[500px]">
+                            {/* Top Card - Article Available */}
+                            <div className="relative rounded-lg overflow-hidden shadow-lg" data-animate="slide-up" style={{ animationDelay: '100ms' }}>
+                                <img 
+                                    src="https://images.unsplash.com/photo-1507608616759-54f48f0af0ee?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1074&q=80" 
+                                    alt="Mountain road with cyclist" 
+                                    className="w-full h-full object-cover"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-primary-dark to-transparent opacity-70"></div>
+                                <div className="absolute bottom-0 left-0 p-6">
+                                    <p className="text-secondary-white font-medium mb-1">Article Available</p>
+                                    <h3 className="text-4xl font-bold text-secondary-white">78</h3>
+                                </div>
+                            </div>
+
+                            {/* Bottom Card - Coastal View */}
+                            <div className="relative rounded-lg overflow-hidden shadow-lg" data-animate="slide-up" style={{ animationDelay: '200ms' }}>
+                                <img 
+                                    src="https://images.unsplash.com/photo-1519046904884-53103b34b206?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" 
+                                    alt="Coastal cliffs" 
+                                    className="w-full h-full object-cover"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-primary-dark to-transparent opacity-50"></div>
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                    <h3 className="text-2xl md:text-3xl font-bold text-secondary-white text-center max-w-xs">
+                                        Beyond accommodation, creating memories of a lifetime
+                                    </h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </Container>
+            </section>
         </div>
     )
 }

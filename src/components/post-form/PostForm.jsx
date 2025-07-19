@@ -4,6 +4,7 @@ import { Button, Input, RTE, Select } from "..";
 import appwriteService from "../../appwrite/config";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+import conf from "../../conf/conf";
 
 export default function PostForm({ post }) {
     const [error, setError] = useState("");
@@ -19,6 +20,12 @@ export default function PostForm({ post }) {
 
     const navigate = useNavigate();
     const userData = useSelector((state) => state.auth.userData);
+
+    // Function to generate direct URL for an image
+    const generateDirectImageUrl = (fileId) => {
+        if (!fileId) return '';
+        return `${conf.appwriteUrl}/storage/buckets/${conf.appwriteBucketId}/files/${fileId}/view?project=${conf.appwriteProjectId}`;
+    };
 
     const submit = async (data) => {
         try {
@@ -125,12 +132,16 @@ export default function PostForm({ post }) {
                     accept="image/png, image/jpg, image/jpeg, image/gif"
                     {...register("image", { required: !post })}
                 />
-                {post && (
+                {post && post.featuredImage && (
                     <div className="w-full mb-4">
                         <img
-                            src={appwriteService.getFilePreview(post.featuredImage)}
+                            src={generateDirectImageUrl(post.featuredImage)}
                             alt={post.title}
                             className="rounded-lg"
+                            onError={(e) => {
+                                console.log("Direct image URL failed in form, trying service URL");
+                                e.target.src = appwriteService.getFilePreview(post.featuredImage);
+                            }}
                         />
                     </div>
                 )}

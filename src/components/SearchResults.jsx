@@ -2,10 +2,17 @@ import React, { useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useSearch } from '../context/SearchContext';
 import appwriteService from '../appwrite/config';
+import conf from '../conf/conf';
 
 function SearchResults() {
   const { searchResults, isSearching, showResults, searchQuery, setShowResults } = useSearch();
   const resultsRef = useRef(null);
+
+  // Function to generate direct URL for an image
+  const generateDirectImageUrl = (fileId) => {
+    if (!fileId) return '';
+    return `${conf.appwriteUrl}/storage/buckets/${conf.appwriteBucketId}/files/${fileId}/view?project=${conf.appwriteProjectId}`;
+  };
 
   // Close results when clicking outside
   useEffect(() => {
@@ -56,10 +63,14 @@ function SearchResults() {
                     {post.featuredImage && (
                       <div className="w-16 h-16 mr-3 rounded overflow-hidden flex-shrink-0">
                         <img 
-                          src={appwriteService.getFilePreview(post.featuredImage)} 
+                          src={generateDirectImageUrl(post.featuredImage)} 
                           alt={post.title}
                           className="w-full h-full object-cover"
                           loading="lazy"
+                          onError={(e) => {
+                            console.log("Direct image URL failed in search results, trying service URL");
+                            e.target.src = appwriteService.getFilePreview(post.featuredImage);
+                          }}
                         />
                       </div>
                     )}
