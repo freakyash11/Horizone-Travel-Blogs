@@ -16,6 +16,8 @@ import DarkModeToggle from "./DarkModeToggle";
 import ScrollToTop from "./ScrollToTop";
 import SearchBar from "./SearchBar";
 import SearchResults from "./SearchResults";
+import AuthBanner from "./AuthBanner";
+import LikeButton from "./LikeButton";
 
 export {
     Header,
@@ -36,4 +38,6 @@ export {
     ScrollToTop,
     SearchBar,
     SearchResults,
+    AuthBanner,
+    LikeButton,
 }

@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import './App.css'
 import authService from "./appwrite/auth"
 import {login, logout} from "./store/authSlice"
-import { Footer, Header, ScrollToTop } from './components'
+import { Footer, Header, ScrollToTop, AuthBanner } from './components'
 import { Outlet, useLocation } from 'react-router-dom'
 
 function App() {
   const [loading, setLoading] = useState(true)
   const dispatch = useDispatch()
   const location = useLocation()
+  const authStatus = useSelector(state => state.auth.status)
   const isHomePage = location.pathname === '/'
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/signup'
 
   useEffect(() => {
     authService.getCurrentUser()
@@ -26,11 +28,11 @@ function App() {
   
   // Check for dark mode preference on initial load
   useEffect(() => {
-    const isDarkMode = localStorage.getItem('darkMode') === 'true' || 
-      window.matchMedia('(prefers-color-scheme: dark)').matches;
-    
+    const isDarkMode = localStorage.getItem('darkMode') === 'true';
     if (isDarkMode) {
       document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
     }
   }, []);
   
@@ -38,7 +40,11 @@ function App() {
     <div className='flex flex-col min-h-screen bg-secondary-lightGray dark:bg-primary-dark font-primary transition-colors duration-300'>
       <Header />
       <main className={`flex-grow ${isHomePage ? '' : 'pt-20 md:pt-24'} dark:text-secondary-white`}>
-        <Outlet />
+        {!authStatus && !isAuthPage ? (
+          <AuthBanner />
+        ) : (
+          <Outlet />
+        )}
       </main>
       <Footer />
       <ScrollToTop />

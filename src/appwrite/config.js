@@ -15,12 +15,63 @@ export class Service{
         this.bucket = new Storage(this.client);
     }
 
+    // Calculate read time based on content length
+    calculateReadTime(content) {
+        if (!content) return 1; // Default to 1 minute for empty content
+        
+        // Strip HTML tags to get plain text
+        const plainText = content.replace(/<[^>]*>/g, '');
+        
+        // Count words (split by whitespace)
+        const words = plainText.trim().split(/\s+/).length;
+        
+        // Average reading speed: 200 words per minute
+        // Calculate read time and round up to nearest minute
+        const readTimeMinutes = Math.max(1, Math.ceil(words / 200));
+        
+        return readTimeMinutes;
+    }
+    // In src/appwrite/config.js
+   async incrementPostViews(slug, currentViews = 0) {
+    try {
+        // Don't block the main thread with this operation
+        // Using setTimeout to make this non-blocking
+        setTimeout(async () => {
+            try {
+                // Increment the view count
+                const views = (currentViews || 0) + 1;
+                
+                await this.databases.updateDocument(
+                    conf.appwriteDatabaseId,
+                    conf.appwriteCollectionId,
+                    slug,
+                    { views }
+                );
+                
+                console.log(`View count updated for post ${slug}: ${views}`);
+            } catch (error) {
+                console.log("Error updating view count:", error);
+                // Don't throw here as this is a background operation
+            }
+        }, 0);
+        
+        return true;
+    } catch (error) {
+        console.log("Appwrite service :: incrementPostViews :: error", error);
+        // Don't throw an error for view counting to prevent disrupting the user experience
+        return false;
+    }
+}
+
     async createPost({title, slug, content, featuredImage, status, userId, category}){
         try {
             // Validate slug format before sending to Appwrite
             if (!this.isValidSlug(slug)) {
                 throw new Error("Invalid slug format. Use only letters, numbers, and hyphens. Max 36 characters.");
             }
+            
+            // Calculate read time based on content
+            const readTime = this.calculateReadTime(content);
             
             // Store long content as a file if it's longer than 400 characters
             let contentId = null;
@@ -49,6 +100,8 @@ export class Service{
                     status,
                     userId,
                     category,
+                    readTime,
+                    views: 0, // Initialize views to 0
                 }
             )
         } catch (error) {
@@ -72,6 +125,9 @@ export class Service{
             const existingPost = await this.getPost(slug);
             let contentId = existingPost.contentId || null;
             let contentPreview = content;
+            
+            // Calculate read time based on updated content
+            const readTime = this.calculateReadTime(content);
             
             // If content is longer than 400 characters
             if (content && content.length > 400) {
@@ -104,6 +160,9 @@ export class Service{
                 }
             }
             
+            // Preserve the existing view count
+            const views = existingPost.views || 0;
+            
             return await this.databases.updateDocument(
                 conf.appwriteDatabaseId,
                 conf.appwriteCollectionId,
@@ -115,6 +174,8 @@ export class Service{
                     featuredImage,
                     status,
                     category,
+                    readTime, // Update the read time when content changes
+                    views, // Preserve the view count
                 }
             )
         } catch (error) {
@@ -156,7 +217,7 @@ export class Service{
                 conf.appwriteCollectionId,
                 slug
             );
-            
+            this.incrementPostViews(slug, post.views);
             // If the post has a contentId, get the full content from the file
             if (post.contentId) {
                 try {
@@ -256,9 +317,13 @@ export class Service{
             };
             
         } catch (error) {
-            console.log("Appwrite service :: searchPosts :: error", error);
-            throw error;
-        }
+            console.error("Search error:", error);
+            // Return a valid empty result structure instead of throwing
+            return {
+              documents: [],
+              total: 0
+            };
+          }
     }
 
     // file upload service
@@ -425,6 +490,121 @@ export class Service{
             };
         } catch (error) {
             console.error("Failed to update permissions for all files:", error);
+            throw error;
+        }
+    }
+
+    // Add a like to a post
+    async addLike(postId, userId) {
+        try {
+            if (!userId) {
+                throw new Error("User must be logged in to like a post");
+            }
+
+            // Get the current post to retrieve existing likes
+            const post = await this.getPost(postId);
+            
+            // Initialize likes array if it doesn't exist
+            const currentLikes = post.likes || [];
+            const likeCount = post.likeCount || 0;
+            
+            // Check if user already liked the post
+            if (currentLikes.includes(userId)) {
+                return post; // User already liked this post
+            }
+            
+            // Add user to likes array and increment count
+            const updatedLikes = [...currentLikes, userId];
+            
+            // Update the post with new likes data
+            const updatedPost = await this.databases.updateDocument(
+                conf.appwriteDatabaseId,
+                conf.appwriteCollectionId,
+                postId,
+                {
+                    likes: updatedLikes,
+                    likeCount: likeCount + 1
+                }
+            );
+            
+            return updatedPost;
+        } catch (error) {
+            console.log("Appwrite service :: addLike :: error", error);
+            throw error;
+        }
+    }
+    
+    // Remove a like from a post
+    async removeLike(postId, userId) {
+        try {
+            if (!userId) {
+                throw new Error("User must be logged in to unlike a post");
+            }
+            
+            // Get the current post to retrieve existing likes
+            const post = await this.getPost(postId);
+            
+            // Initialize likes array if it doesn't exist
+            const currentLikes = post.likes || [];
+            const likeCount = post.likeCount || 0;
+            
+            // Check if user has liked the post
+            if (!currentLikes.includes(userId)) {
+                return post; // User hasn't liked this post
+            }
+            
+            // Remove user from likes array and decrement count
+            const updatedLikes = currentLikes.filter(id => id !== userId);
+            
+            // Update the post with new likes data
+            const updatedPost = await this.databases.updateDocument(
+                conf.appwriteDatabaseId,
+                conf.appwriteCollectionId,
+                postId,
+                {
+                    likes: updatedLikes,
+                    likeCount: Math.max(0, likeCount - 1)
+                }
+            );
+            
+            return updatedPost;
+        } catch (error) {
+            console.log("Appwrite service :: removeLike :: error", error);
+            throw error;
+        }
+    }
+    
+    // Check if a user has liked a post
+    async hasUserLiked(postId, userId) {
+        try {
+            if (!userId) return false;
+            
+            const post = await this.getPost(postId);
+            const likes = post.likes || [];
+            
+            return likes.includes(userId);
+        } catch (error) {
+            console.log("Appwrite service :: hasUserLiked :: error", error);
+            return false;
+        }
+    }
+    
+    // Toggle like status (add if not liked, remove if already liked)
+    async toggleLike(postId, userId) {
+        try {
+            if (!userId) {
+                throw new Error("User must be logged in to toggle like");
+            }
+            
+            const hasLiked = await this.hasUserLiked(postId, userId);
+            
+            if (hasLiked) {
+                return await this.removeLike(postId, userId);
+            } else {
+                return await this.addLike(postId, userId);
+            }
+        } catch (error) {
+            console.log("Appwrite service :: toggleLike :: error", error);
             throw error;
         }
     }

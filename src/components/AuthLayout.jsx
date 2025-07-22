@@ -4,30 +4,30 @@ import {useNavigate} from 'react-router-dom'
 import { Loader } from '@welcome-ui/loader'
 
 export default function Protected({children, authentication = true}) {
-
     const navigate = useNavigate()
     const [loader, setLoader] = useState(true)
     const authStatus = useSelector(state => state.auth.status)
 
     useEffect(() => {
-        //TODO: make it more easy to understand
+        // Ensure theme is applied before rendering
+        const isDarkMode = localStorage.getItem('darkMode') === 'true';
+        if (isDarkMode) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
 
-        // if (authStatus ===true){
-        //     navigate("/")
-        // } else if (authStatus === false) {
-        //     navigate("/login")
-        // }
-        
-        //let authValue = authStatus === true ? true : false
-
-        if(authentication && authStatus !== authentication){
-            navigate("/login") 
-        } else if(!authentication && authStatus !== authentication){
+        // If authentication is required but user is not authenticated
+        if (authentication && !authStatus) {
+            navigate("/login")
+        } 
+        // If authentication is not required but user is already authenticated
+        else if (!authentication && authStatus) {
             navigate("/")
         }
         setLoader(false)
     }, [authStatus, navigate, authentication])
 
-  return loader ?  <Loader size="lg" /> : <>{children}</>
+    return loader ? <Loader size="lg" /> : <>{children}</>
 }
 
