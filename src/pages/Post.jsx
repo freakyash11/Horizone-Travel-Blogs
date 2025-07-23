@@ -98,8 +98,12 @@ function Post() {
     // Create a map to track loading state for related post images
     const [relatedImagesState, setRelatedImagesState] = useState({});
 
+    // Track if view count has been updated
+    const viewCountUpdated = React.useRef(false);
+
     const isAuthor = post && userData ? post.userId === userData.$id : false;
 
+    // Fetch post data
     useEffect(() => {
         if (slug) {
             appwriteService.getPost(slug).then((post) => {
@@ -138,6 +142,19 @@ function Post() {
             });
         }
     }, [slug, navigate]);
+
+    // Increment view count when post is viewed
+    useEffect(() => {
+        // Only increment view count when post data is loaded
+        if (post && slug) {
+            // Only increment if not already counted in this component instance
+            if (!viewCountUpdated.current) {
+                // Increment the view count for this specific post
+                appwriteService.incrementPostViews(slug, post.views);
+                viewCountUpdated.current = true;
+            }
+        }
+    }, [slug, post]);
 
     // Function to handle related image loading
     const handleRelatedImageLoad = (postId) => {
@@ -351,7 +368,7 @@ function Post() {
                                                         <img
                                                             src={getImageUrl(relatedPost.featuredImage)}
                                                             alt={relatedPost.title}
-                                                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 block"
                                                             loading="lazy"
                                                             onLoad={() => handleRelatedImageLoad(relatedPost.$id)}
                                                             onError={(e) => {
@@ -364,6 +381,7 @@ function Post() {
                                                                     handleRelatedImageError(relatedPost.$id);
                                                                 };
                                                             }}
+                                                            style={{display: 'block', opacity: '1', visibility: 'visible'}}
                                                         />
                                                     ) : (
                                                         <div className="w-full h-full bg-secondary-mediumGray dark:bg-primary-slate flex items-center justify-center">

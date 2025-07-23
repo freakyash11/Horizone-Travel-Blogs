@@ -5,6 +5,7 @@ import authService from "./appwrite/auth"
 import {login, logout} from "./store/authSlice"
 import { Footer, Header, ScrollToTop, AuthBanner } from './components'
 import { Outlet, useLocation } from 'react-router-dom'
+import { SearchProvider } from './context/SearchContext'
 
 function App() {
   const [loading, setLoading] = useState(true)
@@ -38,16 +39,18 @@ function App() {
   
   return !loading ? (
     <div className='flex flex-col min-h-screen bg-secondary-lightGray dark:bg-primary-dark font-primary transition-colors duration-300'>
-      <Header />
-      <main className={`flex-grow ${isHomePage ? '' : 'pt-20 md:pt-24'} dark:text-secondary-white`}>
-        {!authStatus && !isAuthPage ? (
-          <AuthBanner />
-        ) : (
-          <Outlet />
-        )}
-      </main>
-      <Footer />
-      <ScrollToTop />
+      <SearchProvider>
+        <Header />
+        <main className={`flex-grow ${isHomePage ? '' : 'pt-20 md:pt-24'} dark:text-secondary-white`}>
+          {!authStatus && !isAuthPage ? (
+            <AuthBanner />
+          ) : (
+            <Outlet />
+          )}
+        </main>
+        <Footer />
+        <ScrollToTop />
+      </SearchProvider>
     </div>
   ) : null
 }

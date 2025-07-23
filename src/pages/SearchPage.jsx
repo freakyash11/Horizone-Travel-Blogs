@@ -11,31 +11,40 @@ function SearchPage() {
   
   const { handleSearch } = useSearch();
   const [results, setResults] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
+    // Only start loading and make API call if there's a query
+    if (!query) {
+      setResults([]);
+      setLoading(false);
+      setError(null);
+      return;
+    }
+
     const fetchResults = async () => {
       setLoading(true);
+      setError(null);
+      
       try {
         const searchResults = await appwriteService.searchPosts(query);
         setResults(searchResults.documents || []);
       } catch (error) {
         console.error('Error fetching search results:', error);
+        setError('An error occurred while searching. Please try again later.');
         setResults([]);
       } finally {
+        // Always set loading to false when done, regardless of success or error
         setLoading(false);
       }
     };
 
-    if (query) {
-      fetchResults();
-      // Update the search context
-      handleSearch(query);
-    } else {
-      setResults([]);
-      setLoading(false);
-    }
-  }, [query, handleSearch]);
+    fetchResults();
+    // Update the search context only when query changes
+    handleSearch(query);
+    
+  }, [query]);  // Remove handleSearch from dependencies to avoid potential loops
 
   return (
     <div className="py-16 bg-secondary-lightGray dark:bg-primary-dark min-h-screen">
@@ -54,6 +63,13 @@ function SearchPage() {
         {loading ? (
           <div className="flex justify-center items-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-accent-blue"></div>
+          </div>
+        ) : error ? (
+          <div className="text-center py-16">
+            <p className="text-lg text-red-500 dark:text-red-400 mb-4">{error}</p>
+            <p className="text-secondary-darkGray dark:text-secondary-mediumGray">
+              Please try again or modify your search terms.
+            </p>
           </div>
         ) : results.length === 0 ? (
           <div className="text-center py-16">

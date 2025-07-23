@@ -5,7 +5,7 @@ import appwriteService from '../appwrite/config';
 import conf from '../conf/conf';
 
 function SearchResults() {
-  const { searchResults, isSearching, showResults, searchQuery, setShowResults } = useSearch();
+  const { searchResults, isSearching, showResults, searchQuery, setShowResults, error } = useSearch();
   const resultsRef = useRef(null);
 
   // Function to generate direct URL for an image
@@ -33,12 +33,16 @@ function SearchResults() {
   return (
     <div 
       ref={resultsRef}
-      className="absolute top-full left-0 right-0 mt-2 bg-secondary-white dark:bg-primary-charcoal rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto"
+      className="absolute top-full left-0 right-0 mt-2 bg-secondary-white dark:bg-primary-charcoal rounded-lg shadow-lg z-50 max-h-[400px] overflow-y-auto w-full md:w-[500px] xl:w-[600px]"
     >
       {isSearching ? (
         <div className="p-4 text-center">
           <div className="inline-block animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-accent-blue"></div>
           <p className="mt-2 text-secondary-darkGray dark:text-secondary-mediumGray">Searching...</p>
+        </div>
+      ) : error ? (
+        <div className="p-4 text-center">
+          <p className="text-red-500 dark:text-red-400">{error}</p>
         </div>
       ) : searchResults.length === 0 ? (
         <div className="p-4 text-center text-secondary-darkGray dark:text-secondary-mediumGray">
@@ -51,7 +55,7 @@ function SearchResults() {
               {searchResults.length} result{searchResults.length !== 1 ? 's' : ''} found
             </p>
           </div>
-          <ul>
+          <ul className="max-h-[350px] overflow-y-auto">
             {searchResults.map((post) => (
               <li key={post.$id} className="border-b border-secondary-mediumGray dark:border-primary-slate last:border-0">
                 <Link 
@@ -79,21 +83,17 @@ function SearchResults() {
                       <p className="text-sm text-secondary-darkGray dark:text-secondary-mediumGray line-clamp-2">
                         {post.content?.replace(/<[^>]*>/g, '').substring(0, 100)}...
                       </p>
+                      {post.category && (
+                        <span className="text-xs inline-block mt-2 bg-secondary-lightGray dark:bg-primary-slate px-2 py-1 rounded text-secondary-darkGray dark:text-secondary-lightGray">
+                          {post.category}
+                        </span>
+                      )}
                     </div>
                   </div>
                 </Link>
               </li>
             ))}
           </ul>
-          <div className="p-3 border-t border-secondary-mediumGray dark:border-primary-slate">
-            <Link 
-              to={`/search?q=${encodeURIComponent(searchQuery)}`}
-              className="block text-center text-accent-blue hover:text-accent-teal transition-colors"
-              onClick={() => setShowResults(false)}
-            >
-              View all results
-            </Link>
-          </div>
         </div>
       )}
     </div>

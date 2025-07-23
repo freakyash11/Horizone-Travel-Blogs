@@ -34,27 +34,32 @@ export class Service{
     // In src/appwrite/config.js
    async incrementPostViews(slug, currentViews = 0) {
     try {
-        // Don't block the main thread with this operation
-        // Using setTimeout to make this non-blocking
-        setTimeout(async () => {
-            try {
-                // Increment the view count
-                const views = (currentViews || 0) + 1;
-                
-                await this.databases.updateDocument(
-                    conf.appwriteDatabaseId,
-                    conf.appwriteCollectionId,
-                    slug,
-                    { views }
-                );
-                
-                console.log(`View count updated for post ${slug}: ${views}`);
-            } catch (error) {
-                console.log("Error updating view count:", error);
-                // Don't throw here as this is a background operation
-            }
-        }, 0);
+        // Check if the view has already been counted in this session
+        const viewKey = `blog_viewed_${slug}`;
         
+        // Only proceed if we're running in a browser environment
+        if (typeof window !== 'undefined' && window.sessionStorage) {
+            // Check if this post has already been viewed in this session
+            if (sessionStorage.getItem(viewKey)) {
+                // View already counted for this session
+                return false;
+            }
+            
+            // Mark this post as viewed in this session
+            sessionStorage.setItem(viewKey, 'true');
+        }
+        
+        // Increment the view count
+        const views = (currentViews || 0) + 1;
+        
+        await this.databases.updateDocument(
+            conf.appwriteDatabaseId,
+            conf.appwriteCollectionId,
+            slug,
+            { views }
+        );
+        
+        console.log(`View count updated for post ${slug}: ${views}`);
         return true;
     } catch (error) {
         console.log("Appwrite service :: incrementPostViews :: error", error);
@@ -217,7 +222,8 @@ export class Service{
                 conf.appwriteCollectionId,
                 slug
             );
-            this.incrementPostViews(slug, post.views);
+            // Removed the incrementPostViews call from here
+            
             // If the post has a contentId, get the full content from the file
             if (post.contentId) {
                 try {
@@ -272,49 +278,60 @@ export class Service{
     async searchPosts(searchQuery) {
         try {
             if (!searchQuery || searchQuery.trim() === '') {
-                // If search query is empty, return all active posts
-                return this.getPosts();
+                // Return empty results for empty queries instead of all posts
+                return {
+                    documents: [],
+                    total: 0
+                };
             }
-
-            // Search in both title and content
-            const titleQuery = [
-                Query.equal("status", "active"),
-                Query.search("title", searchQuery)
-            ];
             
-            const contentQuery = [
-                Query.equal("status", "active"),
-                Query.search("content", searchQuery)
-            ];
-
-            // Get posts that match title
-            const titleResults = await this.databases.listDocuments(
-                conf.appwriteDatabaseId,
-                conf.appwriteCollectionId,
-                titleQuery
-            );
-
-            // Get posts that match content
-            const contentResults = await this.databases.listDocuments(
-                conf.appwriteDatabaseId,
-                conf.appwriteCollectionId,
-                contentQuery
-            );
-
-            // Combine results and remove duplicates
-            const allResults = [...titleResults.documents];
+            console.log("Performing search for:", searchQuery);
+            // Limit the search to active posts
+            const allPosts = await this.getPosts([Query.equal("status", "active")]);
             
-            // Add content results that aren't already in title results
-            contentResults.documents.forEach(contentPost => {
-                if (!allResults.some(post => post.$id === contentPost.$id)) {
-                    allResults.push(contentPost);
-                }
+            if (!allPosts || !allPosts.documents) {
+                console.log(`No active posts found for search "${searchQuery}"`);
+                return {
+                    documents: [],
+                    total: 0
+                };
+            }
+            
+            const searchTermLower = searchQuery.toLowerCase();
+            
+            // Optimize search by preparing criteria once
+            const matchesSearch = (text, term) => text && text.toLowerCase().includes(term);
+            
+            // Client-side filtering on title and content
+            const filteredPosts = allPosts.documents.filter(post => {
+                const titleMatch = matchesSearch(post.title, searchTermLower);
+                const contentMatch = matchesSearch(post.content, searchTermLower);
+                const categoryMatch = matchesSearch(post.category, searchTermLower);
+                
+                return titleMatch || contentMatch || categoryMatch;
             });
-
+            
+            // Sort results by relevance (title matches first, then content)
+            const sortedResults = filteredPosts.sort((a, b) => {
+                const aTitleMatch = a.title && a.title.toLowerCase().includes(searchTermLower);
+                const bTitleMatch = b.title && b.title.toLowerCase().includes(searchTermLower);
+                
+                // Title matches come first
+                if (aTitleMatch && !bTitleMatch) return -1;
+                if (!aTitleMatch && bTitleMatch) return 1;
+                
+                // Then sort by recency
+                return new Date(b.$createdAt) - new Date(a.$createdAt);
+            });
+            
+            console.log(`Found ${sortedResults.length} posts matching "${searchQuery}" (client-side search)`);
+            
             return {
-                documents: allResults,
-                total: allResults.length
+                documents: sortedResults,
+                total: sortedResults.length
             };
+                
+            /* Server-side search code - temporarily disabled due to missing fulltext index */
             
         } catch (error) {
             console.error("Search error:", error);
@@ -323,7 +340,7 @@ export class Service{
               documents: [],
               total: 0
             };
-          }
+        }
     }
 
     // file upload service

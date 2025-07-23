@@ -9,25 +9,35 @@ export const SearchProvider = ({ children }) => {
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [showResults, setShowResults] = useState(false);
+  const [error, setError] = useState(null);
 
-  const handleSearch = async (query) => {
+  const handleSearch = async (query, maxResults = 50) => {
     setSearchQuery(query);
     
-    if (query.trim() === '') {
+    if (!query || query.trim() === '') {
       setSearchResults([]);
       setShowResults(false);
+      setError(null);
+      setIsSearching(false);
       return;
     }
     
     setIsSearching(true);
     setShowResults(true);
+    setError(null);
     
     try {
       const results = await appwriteService.searchPosts(query);
-      setSearchResults(results.documents || []);
+      // Limit the number of results if maxResults is provided
+      const limitedResults = results.documents?.length > maxResults 
+        ? results.documents.slice(0, maxResults) 
+        : (results.documents || []);
+        
+      setSearchResults(limitedResults);
     } catch (error) {
       console.error('Search error:', error);
       setSearchResults([]);
+      setError('Failed to complete search. Please try again.');
     } finally {
       setIsSearching(false);
     }
@@ -37,6 +47,8 @@ export const SearchProvider = ({ children }) => {
     setSearchQuery('');
     setSearchResults([]);
     setShowResults(false);
+    setError(null);
+    setIsSearching(false);
   };
 
   return (
@@ -46,6 +58,7 @@ export const SearchProvider = ({ children }) => {
         searchResults,
         isSearching,
         showResults,
+        error,
         handleSearch,
         clearSearch,
         setShowResults

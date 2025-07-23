@@ -7,6 +7,20 @@ import { Query } from 'appwrite';
 import authService from "../appwrite/auth";
 import conf from "../conf/conf.js";
 
+// Updated Swiper imports
+import { Swiper, SwiperSlide } from 'swiper/react';
+// Import Swiper styles properly
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
+import 'swiper/css/autoplay';
+// Import required modules and register them
+import { Autoplay, Navigation, Pagination } from 'swiper/modules';
+import SwiperCore from 'swiper';
+
+// Register Swiper modules
+SwiperCore.use([Autoplay, Navigation, Pagination]);
+
 function Home() {
     const [posts, setPosts] = useState([])
     const [loading, setLoading] = useState(true)
@@ -14,7 +28,12 @@ function Home() {
     const [selectedCategory, setSelectedCategory] = useState('All')
     const [sortOption, setSortOption] = useState('Newest')
     const categories = ['All', 'Destination', 'Culinary', 'Lifestyle', 'Tips & Hacks']
-
+    
+    // Store both featured posts (most viewed and most liked)
+    const [featuredPosts, setFeaturedPosts] = useState([])
+    // Active slide index for the hero carousel
+    const [activeSlideIndex, setActiveSlideIndex] = useState(0)
+    
     useEffect(() => {
         setLoading(true)
         if (selectedCategory === 'All') {
@@ -22,6 +41,48 @@ function Home() {
                 if (posts) {
                     const sortedPosts = sortPosts(posts.documents, sortOption);
                     setPosts(sortedPosts)
+                    
+                    // Get most viewed and most liked posts
+                    const mostViewed = [...posts.documents].sort((a, b) => (b.views || 0) - (a.views || 0))[0];
+                    const mostLiked = [...posts.documents].sort((a, b) => (b.likeCount || 0) - (a.likeCount || 0))[0];
+                    
+                    // Create featured posts array
+                    const featured = [];
+                    
+                    // Add most viewed if exists
+                    if (mostViewed) {
+                        featured.push({
+                            ...mostViewed,
+                            featureType: 'Most Viewed'
+                        });
+                    }
+                    
+                    // Add most liked if exists and different from most viewed
+                    if (mostLiked) {
+                        if (!mostViewed || mostLiked.$id !== mostViewed.$id) {
+                            featured.push({
+                                ...mostLiked,
+                                featureType: 'Most Liked'
+                            });
+                        } else {
+                            // If the same post is both most viewed and liked, duplicate it with different labels
+                            // This ensures we have at least 2 slides for Swiper to work properly
+                            featured.push({
+                                ...mostLiked,
+                                $id: mostLiked.$id + '-liked',
+                                featureType: 'Most Liked'
+                            });
+                        }
+                    }
+                    
+                    console.log("Featured posts setup:", featured.length, featured.map(p => p.featureType));
+                    
+                    // Always ensure we have at least two slides for the carousel to work
+                    if (featured.length === 1) {
+                        featured.push({...featured[0], $id: featured[0].$id + '-copy'});
+                    }
+                    
+                    setFeaturedPosts(featured);
                 }
                 setLoading(false)
             })
@@ -91,32 +152,25 @@ function Home() {
 
     // Get featured post data for hero section (most viewed post)
     const featuredPost = useMemo(() => {
-      if (posts.length === 0) return null;
-      
-      // Sort posts by views (descending) and take the first one
-      const sortedByViews = [...posts].sort((a, b) => (b.views || 0) - (a.views || 0));
-      return sortedByViews[0];
-    }, [posts]);
+      if (featuredPosts.length === 0) return null;
+      return featuredPosts[activeSlideIndex] || featuredPosts[0];
+    }, [featuredPosts, activeSlideIndex]);
     
     // Hero section background image logic
     const defaultHeroImage = "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80";
     
     // Generate featured image URL if available
-    const generateFeaturedImageUrl = () => {
-        if (!featuredPost || !featuredPost.featuredImage) return defaultHeroImage;
+    const generateFeaturedImageUrl = (post) => {
+        if (!post || !post.featuredImage) return defaultHeroImage;
         
         // Try to generate a direct URL from Appwrite
         try {
-            return `${conf.appwriteUrl}/storage/buckets/${conf.appwriteBucketId}/files/${featuredPost.featuredImage}/view?project=${conf.appwriteProjectId}`;
+            return `${conf.appwriteUrl}/storage/buckets/${conf.appwriteBucketId}/files/${post.featuredImage}/view?project=${conf.appwriteProjectId}`;
         } catch (error) {
             console.error("Error generating featured image URL:", error);
             return defaultHeroImage;
         }
     };
-    
-    const heroImageUrl = useMemo(() => {
-        return generateFeaturedImageUrl();
-    }, [featuredPost]);
 
     const featuredReadTime = featuredPost?.readTime || 10; // Use 10 as default if not available
     
@@ -213,97 +267,174 @@ function Home() {
             {/* Hero Section - Full height with navbar overlay */}
             <section 
                 className="relative min-h-screen bg-cover bg-center flex items-center"
-                style={{ backgroundImage: `url(${heroImageUrl})` }}
-                aria-label="Featured blog post"
+                aria-label="Featured blog posts"
             >
-                {/* Dark gradient overlay (40-60% opacity) */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black opacity-60 to-transparent"></div>
-                
-                {/* Category Tag */}
-                <div className="absolute top-24 left-8 md:left-12 z-10">
-                    <span className="bg-secondary-white bg-opacity-80 text-primary-slate text-xs font-medium px-3 py-1 rounded-full">
-                        {featuredPost?.category || "Destination"}
-                    </span>
-                </div>
-                
-                <div className="w-full absolute bottom-0 left-0 right-0">
-                    <Container className="relative z-10 pb-16 md:pb-24">
-                        <div className="max-w-2xl text-secondary-white">
-                            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6 animate-fade-in">
-                                {featuredPost?.title || "Exploring the Wonders of Hiking"}
-                            </h1>
-                            <p className="text-base md:text-lg mb-6 text-secondary-lightGray opacity-90 animate-fade-in delay-200 max-w-xl">
-                                {featuredPost ? 
-                                    // Strip HTML tags and limit to ~120 characters with ellipsis
-                                    featuredPost.content.replace(/<[^>]*>/g, '').substring(0, 120) + (featuredPost.content.length > 120 ? '...' : '') : 
-                                    "An iconic landmark, this post unveils the secrets that make this destination a traveler's paradise."
-                                }
-                            </p>
-                            
-                            <div className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:space-x-6 sm:items-center mb-8">
-                                {/* Author and date info */}
-                                <div className="flex items-center space-x-2">
-                                    <div className="flex items-center">
-                                        <img 
-                                            src={featuredAuthor.avatar} 
-                                            alt={featuredAuthor.name}
-                                            className="w-10 h-10 rounded-full object-cover border-2 border-secondary-white"
-                                            onError={(e) => {
-                                                e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24'%3E%3Cpath fill='%23ccc' d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'%3E%3C/path%3E%3C/svg%3E";
-                                            }}
-                                        />
-                                        <span className="text-secondary-white font-medium ml-2">{featuredAuthor.name}</span>
+                <Swiper
+                    modules={[Autoplay, Navigation, Pagination]}
+                    spaceBetween={0}
+                    slidesPerView={1}
+                    onSlideChange={(swiper) => {
+                        console.log('Slide changed to:', swiper.activeIndex);
+                        setActiveSlideIndex(swiper.activeIndex);
+                    }}
+                    onSwiper={(swiper) => {
+                        console.log('Swiper instance:', swiper);
+                    }}
+                    autoplay={{
+                        delay: 5000,
+                        disableOnInteraction: false,
+                    }}
+                    pagination={{
+                        clickable: true,
+                        el: '.swiper-pagination',
+                    }}
+                    navigation={{
+                        nextEl: '.swiper-button-next',
+                        prevEl: '.swiper-button-prev',
+                    }}
+                    loop={true}
+                    className="w-full h-full hero-swiper"
+                >
+                    {featuredPosts.length > 0 ? (
+                        featuredPosts.map((post, index) => (
+                            <SwiperSlide key={post.$id || index} className="w-full h-full">
+                                <div 
+                                    className="w-full h-full bg-cover bg-center"
+                                    style={{ backgroundImage: `url(${generateFeaturedImageUrl(post)})` }}
+                                >
+                                    {/* Dark gradient overlay (40-60% opacity) */}
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black opacity-60 to-transparent"></div>
+                                    
+                                    {/* Category Tag */}
+                                    <div className="absolute top-24 left-8 md:left-12 z-10">
+                                        <div className="flex items-center space-x-3">
+                                            <span className="bg-secondary-white bg-opacity-80 text-primary-slate text-xs font-medium px-3 py-1 rounded-full">
+                                                {post?.category || "Destination"}
+                                            </span>
+                                            <span className="bg-accent-blue bg-opacity-80 text-secondary-white text-xs font-medium px-3 py-1 rounded-full">
+                                                {post.featureType}
+                                            </span>
+                                        </div>
                                     </div>
-                                    <span className="text-secondary-mediumGray">•</span>
-                                    <span className="text-secondary-mediumGray">
-                                        {featuredPost ? new Date(featuredPost.$createdAt).toLocaleDateString('en-US', {
-                                            day: 'numeric',
-                                            month: 'short',
-                                            year: 'numeric'
-                                        }) : ''}
-                                    </span>
-                                    <span className="text-secondary-mediumGray">•</span>
-                                    <span className="text-secondary-mediumGray">{featuredReadTime} mins read</span>
+                                    
+                                    <div className="w-full absolute bottom-0 left-0 right-0">
+                                        <Container className="relative z-10 pb-16 md:pb-24">
+                                            <div className="max-w-2xl text-secondary-white">
+                                                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6 animate-fade-in">
+                                                    {post?.title || "Exploring the Wonders of Hiking"}
+                                                </h1>
+                                                <p className="text-base md:text-lg mb-6 text-secondary-lightGray opacity-90 animate-fade-in delay-200 max-w-xl">
+                                                    {post ? 
+                                                        // Strip HTML tags and limit to ~120 characters with ellipsis
+                                                        post.content.replace(/<[^>]*>/g, '').substring(0, 120) + (post.content.length > 120 ? '...' : '') : 
+                                                        "An iconic landmark, this post unveils the secrets that make this destination a traveler's paradise."
+                                                    }
+                                                </p>
+                                                
+                                                <div className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:space-x-6 sm:items-center mb-8">
+                                                    {/* Author and date info */}
+                                                    <div className="flex items-center space-x-2">
+                                                        <div className="flex items-center">
+                                                            <img 
+                                                                src={featuredAuthor.avatar} 
+                                                                alt={featuredAuthor.name}
+                                                                className="w-10 h-10 rounded-full object-cover border-2 border-secondary-white"
+                                                                onError={(e) => {
+                                                                    e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24'%3E%3Cpath fill='%23ccc' d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'%3E%3C/path%3E%3C/svg%3E";
+                                                                }}
+                                                            />
+                                                            <span className="text-secondary-white font-medium ml-2">{featuredAuthor.name}</span>
+                                                        </div>
+                                                        <span className="text-secondary-mediumGray">•</span>
+                                                        <span className="text-secondary-mediumGray">
+                                                            {post ? new Date(post.$createdAt).toLocaleDateString('en-US', {
+                                                                day: 'numeric',
+                                                                month: 'short',
+                                                                year: 'numeric'
+                                                            }) : ''}
+                                                        </span>
+                                                        <span className="text-secondary-mediumGray">•</span>
+                                                        <span className="text-secondary-mediumGray">{post.readTime || 10} mins read</span>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
+                                                    {/* Read More Button */}
+                                                    {post && (
+                                                        <Link 
+                                                            to={`/post/${post.$id}`}
+                                                            className="inline-flex items-center px-6 py-3 bg-secondary-white text-primary-dark font-medium rounded-lg hover:bg-secondary-mediumGray transition-colors duration-300"
+                                                        >
+                                                            Read Full Article
+                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                                            </svg>
+                                                        </Link>
+                                                    )}
+                                                    
+                                                    {/* Metrics badges */}
+                                                    <div className="flex items-center space-x-2 mt-4 sm:mt-0">
+                                                        {/* Views count badge */}
+                                                        <div className="flex items-center space-x-1 bg-secondary-white bg-opacity-20 px-3 py-1.5 rounded-full">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-secondary-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                            </svg>
+                                                            <span className="text-secondary-white font-medium">
+                                                                {post.views || 0}
+                                                            </span>
+                                                        </div>
+                                                        
+                                                        {/* Likes count badge */}
+                                                        <div className="flex items-center space-x-1 bg-secondary-white bg-opacity-20 px-3 py-1.5 rounded-full">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-secondary-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                                            </svg>
+                                                            <span className="text-secondary-white font-medium">
+                                                                {post.likeCount || 0}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </Container>
+                                    </div>
+                                </div>
+                            </SwiperSlide>
+                        ))
+                    ) : (
+                        <SwiperSlide className="w-full h-full">
+                            <div 
+                                className="w-full h-full bg-cover bg-center"
+                                style={{ backgroundImage: `url(${defaultHeroImage})` }}
+                            >
+                                {/* Default content when no posts */}
+                                <div className="absolute inset-0 bg-gradient-to-t from-black opacity-60 to-transparent"></div>
+                                <div className="w-full absolute bottom-0 left-0 right-0">
+                                    <Container className="relative z-10 pb-16 md:pb-24">
+                                        <div className="max-w-2xl text-secondary-white">
+                                            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6 animate-fade-in">
+                                                Welcome to MegaBlog
+                                            </h1>
+                                            <p className="text-base md:text-lg mb-6 text-secondary-lightGray opacity-90 animate-fade-in delay-200 max-w-xl">
+                                                Start your adventure by exploring our collection of travel stories, tips, and destination guides.
+                                            </p>
+                                        </div>
+                                    </Container>
                                 </div>
                             </div>
-                            
-                            <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
-                                {/* Read More Button */}
-                                {featuredPost && (
-                                    <Link 
-                                        to={`/post/${featuredPost.$id}`}
-                                        className="inline-flex items-center px-6 py-3 bg-secondary-white text-primary-dark font-medium rounded-lg hover:bg-secondary-mediumGray transition-colors duration-300"
-                                    >
-                                        Read Full Article
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                                        </svg>
-                                    </Link>
-                                )}
-                                
-                                {/* Views count badge - now next to the button */}
-                                {featuredPost && (
-                                    <div className="flex items-center space-x-2 mt-4 sm:mt-0 bg-secondary-white bg-opacity-20 px-3 py-1.5 rounded-full w-fit">
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-secondary-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                        </svg>
-                                        <span className="text-secondary-white font-medium">
-                                            {featuredPost.views || 0} {(featuredPost.views === 1) ? 'view' : 'views'}
-                                        </span>
-                                    </div>
-                                )}
-                            </div>
-                            
-                            {/* Pagination dots */}
-                            <div className="flex space-x-3 mt-8">
-                                <span className="w-2.5 h-2.5 rounded-full bg-secondary-white"></span>
-                                <span className="w-2.5 h-2.5 rounded-full bg-secondary-white opacity-50"></span>
-                                <span className="w-2.5 h-2.5 rounded-full bg-secondary-white opacity-50"></span>
-                            </div>
-                        </div>
-                    </Container>
-                </div>
+                        </SwiperSlide>
+                    )}
+                
+                    {/* Add navigation buttons directly inside Swiper */}
+                    <div className="swiper-button-prev !text-white !opacity-70 hover:!opacity-100"></div>
+                    <div className="swiper-button-next !text-white !opacity-70 hover:!opacity-100"></div>
+                    
+                    {/* Add pagination directly inside Swiper */}
+                    <div className="swiper-pagination"></div>
+                </Swiper>
+                
+                {/* Remove the old navigation controls that used refs */}
             </section>
 
             {/* Blog Section */}

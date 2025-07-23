@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearch } from '../context/SearchContext';
 import SearchResults from './SearchResults';
 
-function SearchBar({ className = '', mobile = false }) {
+function SearchBar({ className = '', mobile = false, maxResultsToShow = 50 }) {
   const { searchQuery, handleSearch, clearSearch } = useSearch();
   const [inputValue, setInputValue] = useState(searchQuery);
   const searchTimeout = useRef(null);
@@ -13,6 +13,17 @@ function SearchBar({ className = '', mobile = false }) {
     setInputValue(searchQuery);
   }, [searchQuery]);
 
+  // Debounced search handler with useCallback to prevent unnecessary recreations
+  const debouncedSearch = useCallback((value) => {
+    // Don't search with very short queries
+    if (value.trim().length < 1) {
+      clearSearch();
+      return;
+    }
+    
+    handleSearch(value, maxResultsToShow);
+  }, [handleSearch, clearSearch, maxResultsToShow]);
+  
   // Debounce search input
   const handleInputChange = (e) => {
     const value = e.target.value;
@@ -23,16 +34,23 @@ function SearchBar({ className = '', mobile = false }) {
       clearTimeout(searchTimeout.current);
     }
     
-    // Set new timeout for search
+    // Clear search if input is empty
+    if (!value.trim()) {
+      clearSearch();
+      return;
+    }
+    
+    // Set new timeout for search with a 400ms debounce
     searchTimeout.current = setTimeout(() => {
-      handleSearch(value);
-    }, 300);
+      debouncedSearch(value);
+    }, 400);
   };
 
-  // Clear search on escape key
+  // Clear search on escape key or when input is cleared
   const handleKeyDown = (e) => {
     if (e.key === 'Escape') {
       clearSearch();
+      setInputValue('');
       inputRef.current?.blur();
     }
   };
@@ -40,20 +58,7 @@ function SearchBar({ className = '', mobile = false }) {
   return (
     <div className={`relative ${className}`}>
       <div className="relative">
-        <input
-          ref={inputRef}
-          type="text"
-          placeholder="Search destination..."
-          value={inputValue}
-          onChange={handleInputChange}
-          onKeyDown={handleKeyDown}
-          className={`w-full rounded-full py-2 px-4 pl-10 focus:outline-none focus:ring-2 focus:ring-accent-blue ${
-            mobile
-              ? 'bg-secondary-white bg-opacity-20 text-secondary-white placeholder-secondary-lightGray'
-              : 'bg-secondary-white bg-opacity-90 text-primary-dark placeholder-secondary-darkGray'
-          }`}
-        />
-        <div className={`absolute inset-y-0 ${mobile ? 'left-3' : 'right-3'} flex items-center`}>
+        <div className={`absolute inset-y-0 ${mobile ? 'left-3' : 'left-3'} flex items-center`}>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             className={`h-5 w-5 ${mobile ? 'text-secondary-white' : 'text-primary-slate'}`}
@@ -69,10 +74,28 @@ function SearchBar({ className = '', mobile = false }) {
             />
           </svg>
         </div>
+        <input
+          ref={inputRef}
+          type="text"
+          placeholder="Search destinations, activities, and more..."
+          value={inputValue}
+          onChange={handleInputChange}
+          onKeyDown={handleKeyDown}
+          className={`w-full rounded-full py-2 px-4 pl-10 pr-10 focus:outline-none focus:ring-2 focus:ring-accent-blue ${
+            mobile
+              ? 'bg-secondary-white bg-opacity-20 text-secondary-white placeholder-secondary-lightGray'
+              : 'bg-secondary-white bg-opacity-90 text-primary-dark placeholder-secondary-darkGray'
+          }`}
+          aria-label="Search"
+        />
         {inputValue && (
           <button
-            onClick={clearSearch}
-            className="absolute inset-y-0 right-10 flex items-center"
+            onClick={() => {
+              clearSearch();
+              setInputValue('');
+              inputRef.current?.focus();
+            }}
+            className="absolute inset-y-0 right-3 flex items-center"
             aria-label="Clear search"
           >
             <svg

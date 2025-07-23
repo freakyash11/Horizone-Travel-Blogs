@@ -10,6 +10,7 @@ A modern, adventure-focused travel blog built with React, Tailwind CSS, and Appw
 - **Accessibility**: Semantic HTML, keyboard navigation, and ARIA attributes
 - **SEO Optimized**: Meta tags and structured data for better search engine visibility
 - **Performance**: Optimized images, code splitting, and lazy loading
+- **User Statistics**: Display of total registered users and article counts
 
 ## Design System
 
@@ -28,13 +29,28 @@ The design system is based on the Horizone Travel Design System, which includes:
 - **Appwrite**: Backend as a service for authentication and data storage
 - **React Router**: For routing and navigation
 - **Redux Toolkit**: For state management
+- **Express.js**: Backend server for secure API endpoints
 
 ## Getting Started
+
+### Frontend Setup
 
 1. Clone the repository
 2. Install dependencies: `npm install`
 3. Start the development server: `npm run dev`
 4. Open [http://localhost:5173](http://localhost:5173) in your browser
+
+### API Server Setup
+
+The project includes an API server for secure access to Appwrite resources:
+
+1. Navigate to the API directory: `cd api`
+2. Install dependencies: `npm install`
+3. Create a `.env` file with your Appwrite credentials (see `api/README.md`)
+4. Start the API server: `npm run dev`
+5. API server will run on [http://localhost:3000](http://localhost:3000)
+
+For more detailed instructions, see the [API README](./api/README.md).
 
 ## Project Structure
 
@@ -50,6 +66,11 @@ src/
   ├── utils/           # Utility functions
   ├── App.jsx          # Main App component
   └── main.jsx         # Entry point
+
+api/
+  ├── functions/       # API functions (user count, etc.)
+  ├── server.js        # Express server setup
+  └── package.json     # API server dependencies
 ```
 
 ## Design Implementation

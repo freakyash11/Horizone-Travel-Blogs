@@ -67,44 +67,59 @@ function AllPosts() {
             }, 100);
         }
     }, [loading, posts]);
+
+    // Force re-render function
+    const forceRefresh = () => {
+        console.log("Forcing refresh...");
+        // Create a temporary loading state to trigger re-render
+        setLoading(true);
+        
+        // Wait a moment and then reset loading state
+        setTimeout(() => {
+            console.log("Current posts state:", posts);
+            setLoading(false);
+        }, 500);
+    };
     
     return (
-        <div className='w-full py-8 mt-12'>
+        <div className='w-full py-16 bg-secondary-lightGray dark:bg-primary-dark'>
             <Container>
-                <div className='mb-8 flex flex-wrap items-center justify-between'>
-                    <h1 className='text-2xl font-bold'>All Posts</h1>
-                    <div className='flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-4'>
-                        <div>
-                            <span className='text-gray-700 dark:text-secondary-mediumGray mr-2'>Filter by:</span>
-                            <div className='flex flex-wrap gap-2 mt-2'>
-                                {categories.map((category) => (
-                                    <button
-                                        key={category}
-                                        onClick={() => setSelectedCategory(category)}
-                                        className={`px-4 py-2 rounded-md text-sm font-medium ${
-                                            selectedCategory === category
-                                                ? 'bg-primary-dark text-secondary-white dark:bg-accent-blue'
-                                                : 'bg-secondary-mediumGray text-primary-dark dark:bg-primary-slate dark:text-secondary-white hover:bg-secondary-darkGray'
-                                        }`}
-                                    >
-                                        {category}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                        
-                        <div className="mt-4 md:mt-0">
-                            <span className='text-gray-700 dark:text-secondary-mediumGray mr-2'>Sort by:</span>
-                            <select 
-                                className="px-4 py-2 bg-secondary-white dark:bg-primary-charcoal rounded-md border border-secondary-mediumGray mt-2"
-                                value={sortOption}
-                                onChange={(e) => setSortOption(e.target.value)}
+                <div className="mb-12">
+                    <h2 className="text-3xl font-bold text-primary-dark dark:text-secondary-white mb-4">
+                        All Posts
+                    </h2>
+                    <p className="text-lg text-secondary-darkGray dark:text-secondary-mediumGray">
+                        Discover a collection of travel stories, tips, and destination guides.
+                    </p>
+                </div>
+                
+                {/* Category filters */}
+                <div className="flex flex-wrap items-center justify-between mb-8">
+                    <div className="flex space-x-4 overflow-x-auto pb-2">
+                        {categories.map((category) => (
+                            <button 
+                                key={category}
+                                onClick={() => setSelectedCategory(category)}
+                                className={`px-4 py-2 rounded-md ${
+                                    selectedCategory === category 
+                                        ? 'bg-primary-dark text-secondary-white dark:bg-accent-blue' 
+                                        : 'hover:bg-secondary-mediumGray'
+                                }`}
                             >
-                                <option value="Newest">Newest</option>
-                                <option value="Oldest">Oldest</option>
-                                <option value="Most Popular">Most Popular</option>
-                            </select>
-                        </div>
+                                {category}
+                            </button>
+                        ))}
+                    </div>
+                    <div className="mt-4 md:mt-0">
+                        <select 
+                            className="px-4 py-2 bg-secondary-white dark:bg-primary-charcoal rounded-md border border-secondary-mediumGray"
+                            value={sortOption}
+                            onChange={(e) => setSortOption(e.target.value)}
+                        >
+                            <option value="Newest">Newest</option>
+                            <option value="Oldest">Oldest</option>
+                            <option value="Most Popular">Most Popular</option>
+                        </select>
                     </div>
                 </div>
                 
@@ -113,38 +128,53 @@ function AllPosts() {
                         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-accent-blue"></div>
                     </div>
                 ) : posts.length === 0 ? (
-                    <div className="w-full py-8 text-center">
-                        <div className="p-2 w-full font-bold">
-                            No Posts {selectedCategory !== 'All' && `in ${selectedCategory} category`}
-                        </div>
+                    <div className="text-center py-16">
+                        <h2 className="text-3xl font-bold text-primary-dark dark:text-secondary-white mb-6" data-animate="fade-in">
+                            {selectedCategory === 'All' 
+                                ? 'No Posts Found' 
+                                : `No Posts in ${selectedCategory} Category`}
+                        </h2>
+                        <p className="text-lg text-secondary-darkGray dark:text-secondary-mediumGray mb-8 max-w-2xl mx-auto" data-animate="slide-up">
+                            {selectedCategory === 'All' 
+                                ? 'There are no posts available at the moment.' 
+                                : `There are no posts in the ${selectedCategory} category yet.`}
+                        </p>
                     </div>
                 ) : (
                     <>
                         <p className="text-sm text-secondary-darkGray dark:text-secondary-mediumGray mb-6">
                             Found {posts.length} posts {selectedCategory !== 'All' && `in ${selectedCategory} category`}
                         </p>
-                        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-                        {posts.map((post, index) => (
-                            <div 
-                                key={post.$id}
-                                className="mb-4"
-                                data-animate="scale-up"
-                                style={{ animationDelay: `${index * 100}ms` }}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {posts.map((post, index) => (
+                                <div 
+                                    key={post.$id}
+                                    data-animate="scale-up"
+                                    style={{ animationDelay: `${index * 100}ms` }}
+                                    className="mb-4"
+                                >
+                                    <PostCard 
+                                        $id={post.$id} 
+                                        title={post.title} 
+                                        featuredImage={post.featuredImage} 
+                                        content={post.content} 
+                                        $createdAt={post.$createdAt} 
+                                        category={post.category} 
+                                        userId={post.userId}
+                                        readTime={post.readTime}
+                                        views={post.views || 0}
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                        <div className="mt-16 text-center" data-animate="fade-in">
+                            <button 
+                                onClick={forceRefresh}
+                                className="inline-flex items-center px-6 py-3 border border-accent-blue text-accent-blue dark:text-accent-blue font-semibold rounded-lg hover:bg-accent-blue hover:text-secondary-white transition-colors duration-300"
                             >
-                                <PostCard 
-                                    $id={post.$id} 
-                                    title={post.title} 
-                                    featuredImage={post.featuredImage} 
-                                    content={post.content} 
-                                    $createdAt={post.$createdAt} 
-                                    category={post.category} 
-                                    userId={post.userId}
-                                    readTime={post.readTime}
-                                    views={post.views || 0}
-                                />
-                            </div>
-                        ))}
-                    </div>
+                                Refresh Posts
+                            </button>
+                        </div>
                     </>
                 )}
             </Container>

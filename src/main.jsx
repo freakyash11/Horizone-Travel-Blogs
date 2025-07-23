@@ -3,6 +3,12 @@ import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
 import './index.css'
 
+// Import Swiper styles globally
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
+import 'swiper/css/autoplay';
+
 // Set theme before React renders
 const isDarkMode = localStorage.getItem('darkMode') === 'true';
 if (isDarkMode) {
@@ -114,9 +120,7 @@ const router = createBrowserRouter([
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <Provider store={store}>
-      <SearchProvider>
-        <RouterProvider router={router}/>
-      </SearchProvider>
+      <RouterProvider router={router}/>
     </Provider>
   </React.StrictMode>,
 )
