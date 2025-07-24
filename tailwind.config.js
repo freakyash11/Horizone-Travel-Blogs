@@ -25,7 +25,7 @@ export default {
         },
         overlay: {
           dark: "rgba(0, 0, 0, 0.4)",
-          light: "rgba(0, 0, 0, 0.2)"
+          light: "rgba(255, 255, 255, 0.4)"
         }
       },
       fontFamily: {

@@ -505,7 +505,8 @@ function Home() {
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {posts.map((post, index) => (
+                            {/* Limit to display only the first 3 posts on homepage */}
+                            {posts.slice(0, 3).map((post, index) => (
                                 <div 
                                     key={post.$id} 
                                     data-animate="scale-up"
@@ -534,7 +535,7 @@ function Home() {
                                 to="/all-posts" 
                                 className="inline-flex items-center px-6 py-3 border border-accent-blue text-accent-blue dark:text-accent-blue font-semibold rounded-lg hover:bg-accent-blue hover:text-secondary-white transition-colors duration-300"
                             >
-                                View All Posts
+                                {posts.length > 3 ? `View All Posts (${posts.length})` : 'View All Posts'}
                             </Link>
                         </div>
                     )}
@@ -547,27 +548,26 @@ function Home() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         {/* Left Column - Comfort Zone Card */}
                         <div className="relative h-[500px] rounded-lg overflow-hidden shadow-lg" data-animate="slide-up">
+                            <img 
+                                src="https://images.unsplash.com/photo-1501555088652-021faa106b9b?q=80&w=2073&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
+                                alt="Travel adventure background" 
+                                className="absolute inset-0 w-full h-full object-cover z-0"
+                            />
                             <div className="absolute inset-0 bg-primary-dark bg-opacity-80 z-10"></div>
                             <div className="absolute inset-0 flex flex-col justify-center p-10 z-20">
-                                <div className="mb-4">
-                                    <div className="w-10 h-10 rounded-full bg-secondary-white bg-opacity-20 flex items-center justify-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-secondary-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                    </div>
-                                </div>
+                                
                                 <h2 className="text-3xl md:text-4xl font-bold text-secondary-white mb-4">
-                                    Explore more to get your comfort zone
+                                Ready to Share Your Journey?
                                 </h2>
                                 <p className="text-secondary-mediumGray mb-8">
-                                    Book your perfect stay with us.
+                                Your adventures deserve a spotlight! <b>Create your first blog post</b> and inspire a community of fellow travelers. What incredible story will you tell?
                                 </p>
                                 <div>
                                     <Link 
-                                        to="/destinations" 
+                                        to="/add-post" 
                                         className="inline-flex items-center px-6 py-3 bg-secondary-white text-primary-dark font-medium rounded-lg hover:bg-secondary-mediumGray transition-colors duration-300"
                                     >
-                                        Booking Now
+                                        Create Your Blog
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                                         </svg>
@@ -581,7 +581,7 @@ function Home() {
                             {/* Top Card - Article Available */}
                             <div className="relative rounded-lg overflow-hidden shadow-lg" data-animate="slide-up" style={{ animationDelay: '100ms' }}>
                                 <img 
-                                    src="https://images.unsplash.com/photo-1507608616759-54f48f0af0ee?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1074&q=80" 
+                                    src="https://images.unsplash.com/photo-1521336575822-6da63fb45455?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
                                     alt="Mountain road with cyclist" 
                                     className="w-full h-full object-cover"
                                 />
@@ -603,7 +603,7 @@ function Home() {
                             {/* Bottom Card - Coastal View */}
                             <div className="relative rounded-lg overflow-hidden shadow-lg" data-animate="slide-up" style={{ animationDelay: '200ms' }}>
                                 <img 
-                                    src="https://images.unsplash.com/photo-1519046904884-53103b34b206?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" 
+                                    src="https://plus.unsplash.com/premium_photo-1732738372704-317ff6db9a7c?q=80&w=1231&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
                                     alt="Coastal cliffs" 
                                     className="w-full h-full object-cover"
                                 />

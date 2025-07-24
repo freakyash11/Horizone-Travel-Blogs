@@ -1,8 +1,11 @@
 import React from 'react'
 import logo from '../assets/logo.png'
-function Logo() {
+
+function Logo({className = ''}) {
   return (
-    <img src= {logo} alt="" className='w-[75px]' />
+    <div className={`flex items-center ${className}`}>
+      <img src={logo} alt="MegaBlog Logo" className='w-[75px] h-auto' />
+    </div>
   )
 }
 

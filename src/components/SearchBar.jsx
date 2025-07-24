@@ -61,7 +61,11 @@ function SearchBar({ className = '', mobile = false, maxResultsToShow = 50 }) {
         <div className={`absolute inset-y-0 ${mobile ? 'left-3' : 'left-3'} flex items-center`}>
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className={`h-5 w-5 ${mobile ? 'text-secondary-white' : 'text-primary-slate'}`}
+            className={`h-5 w-5 ${
+              mobile 
+                ? 'text-secondary-white dark:text-primary-dark' 
+                : 'text-primary-slate dark:text-primary-slate'
+            }`}
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -77,14 +81,14 @@ function SearchBar({ className = '', mobile = false, maxResultsToShow = 50 }) {
         <input
           ref={inputRef}
           type="text"
-          placeholder="Search destinations, activities, and more..."
+          placeholder="Search blogs"
           value={inputValue}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           className={`w-full rounded-full py-2 px-4 pl-10 pr-10 focus:outline-none focus:ring-2 focus:ring-accent-blue ${
             mobile
-              ? 'bg-secondary-white bg-opacity-20 text-secondary-white placeholder-secondary-lightGray'
-              : 'bg-secondary-white bg-opacity-90 text-primary-dark placeholder-secondary-darkGray'
+              ? 'bg-secondary-white bg-opacity-20 text-secondary-white dark:bg-primary-dark dark:bg-opacity-20 dark:text-primary-dark placeholder-secondary-lightGray dark:placeholder-primary-slate'
+              : 'bg-secondary-white bg-opacity-90 text-primary-dark dark:bg-secondary-mediumGray dark:text-primary-dark placeholder-secondary-darkGray'
           }`}
           aria-label="Search"
         />
@@ -100,7 +104,11 @@ function SearchBar({ className = '', mobile = false, maxResultsToShow = 50 }) {
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className={`h-4 w-4 ${mobile ? 'text-secondary-white' : 'text-primary-slate'}`}
+              className={`h-4 w-4 ${
+                mobile 
+                  ? 'text-secondary-white dark:text-primary-dark' 
+                  : 'text-primary-slate dark:text-primary-slate'
+              }`}
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"

@@ -349,49 +349,28 @@ function Post() {
                                     <Link
                                         key={relatedPost.$id}
                                         to={`/post/${relatedPost.$id}`}
-                                        className="block group"
+                                        className="block"
                                     >
-                                        <div className="bg-secondary-white dark:bg-primary-charcoal rounded-lg overflow-hidden shadow-md transition-transform duration-300 group-hover:shadow-lg">
+                                        <div className="bg-secondary-white dark:bg-primary-charcoal rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
                                             {/* Related post image */}
                                             {relatedPost.featuredImage && (
-                                                <div className="aspect-[16/9] overflow-hidden relative">
-                                                    {relatedImagesState[relatedPost.$id]?.loading && (
-                                                        <div className="absolute inset-0 flex items-center justify-center bg-secondary-lightGray dark:bg-primary-slate">
-                                                            <div className="animate-pulse text-accent-blue opacity-50">
-                                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                                </svg>
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                    {!relatedImagesState[relatedPost.$id]?.error ? (
-                                                        <img
-                                                            src={getImageUrl(relatedPost.featuredImage)}
-                                                            alt={relatedPost.title}
-                                                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 block"
-                                                            loading="lazy"
-                                                            onLoad={() => handleRelatedImageLoad(relatedPost.$id)}
-                                                            onError={(e) => {
-                                                                console.log("Related post image direct URL failed, trying service URL");
-                                                                e.target.src = appwriteService.getFilePreview(relatedPost.featuredImage);
-                                                                
-                                                                // Add a second error handler for the fallback
-                                                                e.target.onerror = () => {
-                                                                    console.log("Related post image fallback also failed");
-                                                                    handleRelatedImageError(relatedPost.$id);
-                                                                };
-                                                            }}
-                                                            style={{display: 'block', opacity: '1', visibility: 'visible'}}
-                                                        />
-                                                    ) : (
-                                                        <div className="w-full h-full bg-secondary-mediumGray dark:bg-primary-slate flex items-center justify-center">
-                                                            <div className="text-center text-secondary-darkGray dark:text-secondary-mediumGray">
-                                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 mx-auto opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                                </svg>
-                                                            </div>
-                                                        </div>
-                                                    )}
+                                                <div className="aspect-[16/9] overflow-hidden">
+                                                    <img
+                                                        src={getImageUrl(relatedPost.featuredImage)}
+                                                        alt={relatedPost.title}
+                                                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                                                        loading="lazy"
+                                                        onError={(e) => {
+                                                            console.log("Related post image direct URL failed, trying service URL");
+                                                            e.target.src = appwriteService.getFilePreview(relatedPost.featuredImage);
+                                                            
+                                                            // Add a second error handler for the fallback
+                                                            e.target.onerror = () => {
+                                                                console.log("Related post image fallback also failed");
+                                                                e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%' height='100%' viewBox='0 0 24 24'%3E%3Cpath fill='%23ccc' d='M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z'%3E%3C/path%3E%3C/svg%3E";
+                                                            };
+                                                        }}
+                                                    />
                                                 </div>
                                             )}
                                             <div className="p-4">
