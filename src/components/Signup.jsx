@@ -9,8 +9,10 @@ import {useForm} from 'react-hook-form'
 function Signup() {
     const navigate = useNavigate()
     const [error, setError] = useState("")
+    const [loading, setLoading] = useState(false)
+    const [success, setSuccess] = useState(false)
     const dispatch = useDispatch()
-    const {register, handleSubmit} = useForm()
+    const {register, handleSubmit, formState: { errors }} = useForm()
 
     // Ensure light mode is applied if it's the default
     useEffect(() => {
@@ -22,15 +24,44 @@ function Signup() {
 
     const create = async(data) => {
         setError("")
+        setLoading(true)
+        setSuccess(false)
+        
         try {
+            // Validate password strength
+            if (data.password.length < 8) {
+                setError("Password must be at least 8 characters long")
+                setLoading(false)
+                return
+            }
+            
+            // Create account
             const userData = await authService.createAccount(data)
             if (userData) {
+                setSuccess(true)
                 const userData = await authService.getCurrentUser()
                 if(userData) dispatch(login({userData}));
-                navigate("/")
+                
+                // Short delay before redirect for better UX
+                setTimeout(() => {
+                    navigate("/")
+                }, 1000)
             }
         } catch (error) {
-            setError(error.message)
+            console.error("Registration error:", error)
+            // Extract and format error message
+            let errorMsg = error.message || "Registration failed"
+            
+            // Handle specific Appwrite error codes
+            if (error.code === 409) {
+                errorMsg = "Email already exists. Please use a different email or login."
+            } else if (error.code === 400) {
+                errorMsg = "Invalid email or password format."
+            }
+            
+            setError(errorMsg)
+        } finally {
+            setLoading(false)
         }
     }
 
@@ -52,7 +83,8 @@ function Signup() {
                         Sign In
                     </Link>
                 </p>
-                {error && <p className="text-red-600 mt-8 text-center">{error}</p>}
+                {error && <p className="text-red-600 mt-4 text-center">{error}</p>}
+                {success && <p className="text-green-600 mt-4 text-center">Account created successfully! Redirecting...</p>}
 
                 <form onSubmit={handleSubmit(create)}>
                     <div className='space-y-5'>
@@ -60,30 +92,55 @@ function Signup() {
                         label="Full Name: "
                         placeholder="Enter your full name"
                         {...register("name", {
-                            required: true,
+                            required: "Full name is required",
+                            minLength: {
+                                value: 2,
+                                message: "Name must be at least 2 characters"
+                            }
                         })}
                         />
+                        {errors.name && (
+                            <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
+                        )}
+                        
                         <Input
                         label="Email: "
                         placeholder="Enter your email"
                         type="email"
                         {...register("email", {
-                            required: true,
+                            required: "Email is required",
                             validate: {
-                                matchPatern: (value) => /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(value) ||
+                                matchPattern: (value) => /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(value) ||
                                 "Email address must be a valid address",
                             }
                         })}
                         />
+                        {errors.email && (
+                            <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
+                        )}
+                        
                         <Input
                         label="Password: "
                         type="password"
                         placeholder="Enter your password"
                         {...register("password", {
-                            required: true,})}
+                            required: "Password is required",
+                            minLength: {
+                                value: 8,
+                                message: "Password must be at least 8 characters"
+                            }
+                        })}
                         />
-                        <Button type="submit" className="w-full">
-                            Create Account
+                        {errors.password && (
+                            <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>
+                        )}
+                        
+                        <Button 
+                            type="submit" 
+                            className="w-full"
+                            disabled={loading}
+                        >
+                            {loading ? "Creating Account..." : "Create Account"}
                         </Button>
                     </div>
                 </form>

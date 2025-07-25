@@ -67,7 +67,19 @@ function PostCard({$id, title, featuredImage, content, $createdAt, category, use
     if (userId) {
       const fetchUserDetails = async () => {
         try {
-          // Check if current user matches the post userId
+          // Try to get the user profile using the new getUserProfile method
+          const userProfile = await authService.getUserProfile(userId);
+          
+          if (userProfile && userProfile.name) {
+            // If we found a user profile, use the real name
+            setAuthor({
+              name: userProfile.name,
+              avatar: profileImages[0] // You can add profile pictures to user profiles later
+            });
+            return;
+          }
+          
+          // Fallback: Check if current user matches the post userId
           const currentUser = await authService.getCurrentUser();
           
           // Generate a consistent hash from the user's ID for deterministic avatar selection
@@ -91,43 +103,21 @@ function PostCard({$id, title, featuredImage, content, $createdAt, category, use
               });
             }
           } else {
-            // Try to get user info from Appwrite
-            try {
-              // Note: This would require a getUser method in authService
-              // Since we don't have direct access to other users' data in Appwrite without admin privileges,
-              // we'll use a deterministic approach for the name based on userId
-              const fallbackIndex = userIdHash % fallbackNames.length;
-              const userName = fallbackNames[fallbackIndex];
-              
-              // Check if the generated name is Yash Singh Kuwarbi
-              if (userName === "Yash Singh Kuwarbi") {
-                setAuthor({
-                  name: userName,
-                  avatar: "/WhatsApp Image 2025-07-21 at 15.07.29_ff90baa4.jpg"
-                });
-              } else {
-                setAuthor({
-                  name: userName,
-                  avatar: profileImages[avatarIndex]
-                });
-              }
-            } catch (userError) {
-              console.log("Could not fetch specific user details:", userError);
-              const fallbackIndex = userIdHash % fallbackNames.length;
-              const userName = fallbackNames[fallbackIndex];
-              
-              // Check if the generated name is Yash Singh Kuwarbi
-              if (userName === "Yash Singh Kuwarbi") {
-                setAuthor({
-                  name: userName,
-                  avatar: "/WhatsApp Image 2025-07-21 at 15.07.29_ff90baa4.jpg"
-                });
-              } else {
-                setAuthor({
-                  name: userName,
-                  avatar: profileImages[avatarIndex]
-                });
-              }
+            // Use deterministic approach for users we can't directly fetch
+            const fallbackIndex = userIdHash % fallbackNames.length;
+            const userName = fallbackNames[fallbackIndex];
+            
+            // Check if the generated name is Yash Singh Kuwarbi
+            if (userName === "Yash Singh Kuwarbi") {
+              setAuthor({
+                name: userName,
+                avatar: "/WhatsApp Image 2025-07-21 at 15.07.29_ff90baa4.jpg"
+              });
+            } else {
+              setAuthor({
+                name: userName,
+                avatar: profileImages[avatarIndex]
+              });
             }
           }
         } catch (error) {

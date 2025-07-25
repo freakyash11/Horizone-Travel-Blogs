@@ -20,7 +20,19 @@ const AuthorInfo = ({ userId, createdAt, content, readTime, views = 0 }) => {
     useEffect(() => {
         const fetchAuthorDetails = async () => {
             try {
-                // Try to get user info if possible
+                // Try to get the user profile using the new getUserProfile method
+                const userProfile = await authService.getUserProfile(userId);
+                
+                if (userProfile && userProfile.name) {
+                    // If we found a user profile, use the real name
+                    setAuthor({
+                        name: userProfile.name,
+                        avatar: defaultAvatar, // You can add profile pictures to user profiles later
+                    });
+                    return;
+                }
+                
+                // Fallback: Try to get user info if possible
                 const currentUser = await authService.getCurrentUser();
                 
                 if (currentUser && currentUser.$id === userId) {
