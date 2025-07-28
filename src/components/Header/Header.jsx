@@ -22,12 +22,12 @@ function Header() {
       primary: true
     },
     {
-      name: "My Posts",
+      name: "My Blogs",
       slug: "/my-posts",
       active: authStatus,
     },
     {
-      name: "Add Post",
+      name: "Add Blogs",
       slug: "/add-post",
       active: authStatus,
     },

@@ -202,13 +202,36 @@ function Home() {
         
         const fetchFeaturedAuthor = async () => {
             try {
-                // Check if current user matches the post userId
-                const currentUser = await authService.getCurrentUser();
                 const userId = featuredPost.userId;
                 
                 // Generate a consistent hash from the user's ID for deterministic avatar selection
                 const userIdHash = userId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
                 const avatarIndex = userIdHash % profileImages.length;
+                
+                // Try to get the user profile using the getUserProfile method
+                const userProfile = await authService.getUserProfile(userId);
+                
+                if (userProfile && userProfile.name) {
+                    // If we found a user profile, use the real name
+                    const userName = userProfile.name;
+                    
+                    // Check if the user is Yash Singh Kuwarbi and use the specific image from public folder
+                    if (userName === "Yash Singh Kuwarbi") {
+                        setFeaturedAuthor({
+                            name: userName,
+                            avatar: "/WhatsApp Image 2025-07-21 at 15.07.29_ff90baa4.jpg"
+                        });
+                    } else {
+                        setFeaturedAuthor({
+                            name: userName,
+                            avatar: profileImages[avatarIndex]
+                        });
+                    }
+                    return;
+                }
+                
+                // Fallback: Check if current user matches the post userId
+                const currentUser = await authService.getCurrentUser();
                 
                 if (currentUser && currentUser.$id === userId) {
                     // If it's the current user, use their actual name
@@ -311,7 +334,11 @@ function Home() {
                                             <span className="bg-secondary-white bg-opacity-80 text-primary-slate text-xs font-medium px-3 py-1 rounded-full">
                                                 {post?.category || "Destination"}
                                             </span>
-                                            <span className="bg-accent-blue bg-opacity-80 text-secondary-white text-xs font-medium px-3 py-1 rounded-full">
+                                            <span className={`${
+                                                post.featureType === 'Most Viewed' 
+                                                    ? 'bg-blue-500' 
+                                                    : 'bg-[#ef4444]'
+                                            } bg-opacity-80 text-secondary-white text-xs font-medium px-3 py-1 rounded-full`}>
                                                 {post.featureType}
                                             </span>
                                         </div>
@@ -505,8 +532,7 @@ function Home() {
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {/* Limit to display only the first 3 posts on homepage */}
-                            {posts.slice(0, 3).map((post, index) => (
+                            {posts.map((post, index) => (
                                 <div 
                                     key={post.$id} 
                                     data-animate="scale-up"
@@ -535,7 +561,7 @@ function Home() {
                                 to="/all-posts" 
                                 className="inline-flex items-center px-6 py-3 border border-accent-blue text-accent-blue dark:text-accent-blue font-semibold rounded-lg hover:bg-accent-blue hover:text-secondary-white transition-colors duration-300"
                             >
-                                {posts.length > 3 ? `View All Posts (${posts.length})` : 'View All Posts'}
+                                View All Blogs
                             </Link>
                         </div>
                     )}
@@ -549,28 +575,39 @@ function Home() {
                         {/* Left Column - Comfort Zone Card */}
                         <div className="relative h-[500px] rounded-lg overflow-hidden shadow-lg" data-animate="slide-up">
                             <img 
-                                src="https://images.unsplash.com/photo-1501555088652-021faa106b9b?q=80&w=2073&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
-                                alt="Travel adventure background" 
-                                className="absolute inset-0 w-full h-full object-cover z-0"
+                                src="https://images.unsplash.com/photo-1501555088652-021faa106b9b?q=80&w=1173&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
+                                alt="Scenic mountain landscape" 
+                                className="absolute inset-0 w-full h-full object-cover"
                             />
-                            <div className="absolute inset-0 bg-primary-dark bg-opacity-80 z-10"></div>
+                            <div className="absolute inset-0 bg-gradient-to-b from-primary-dark/90 to-primary-dark/70 z-10"></div>
                             <div className="absolute inset-0 flex flex-col justify-center p-10 z-20">
-                                
-                                <h2 className="text-3xl md:text-4xl font-bold text-secondary-white mb-4">
-                                Ready to Share Your Journey?
+                                <h2 className="text-3xl md:text-4xl font-bold text-secondary-white mb-4 text-shadow-lg">
+                                    Ready to Share Your Journey?
                                 </h2>
                                 <p className="text-secondary-mediumGray mb-8">
-                                Your adventures deserve a spotlight! <b>Create your first blog post</b> and inspire a community of fellow travelers. What incredible story will you tell?
+                                    Your adventures deserve a spotlight! <b>Create your first blog post </b> and inspire a community of fellow travelers. What incredible story will you tell?
                                 </p>
                                 <div>
                                     <Link 
                                         to="/add-post" 
-                                        className="inline-flex items-center px-6 py-3 bg-secondary-white text-primary-dark font-medium rounded-lg hover:bg-secondary-mediumGray transition-colors duration-300"
+                                        className="group inline-flex items-center px-8 py-4 bg-secondary-white text-primary-dark font-semibold rounded-xl shadow-lg hover:bg-accent-blue hover:text-secondary-white transform hover:scale-105 transition-all duration-300 ease-in-out relative overflow-hidden"
                                     >
-                                        Create Your Blog
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                        <span className="relative z-10">Create Blog</span>
+                                        <svg 
+                                            xmlns="http://www.w3.org/2000/svg" 
+                                            className="h-5 w-5 ml-2 transform group-hover:translate-x-1 transition-transform duration-300 ease-in-out" 
+                                            fill="none" 
+                                            viewBox="0 0 24 24" 
+                                            stroke="currentColor"
+                                        >
+                                            <path 
+                                                strokeLinecap="round" 
+                                                strokeLinejoin="round" 
+                                                strokeWidth={2} 
+                                                d="M14 5l7 7m0 0l-7 7m7-7H3" 
+                                            />
                                         </svg>
+                                        <div className="absolute inset-0 bg-gradient-to-r from-accent-blue to-accent-teal opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
                                     </Link>
                                 </div>
                             </div>
@@ -581,7 +618,7 @@ function Home() {
                             {/* Top Card - Article Available */}
                             <div className="relative rounded-lg overflow-hidden shadow-lg" data-animate="slide-up" style={{ animationDelay: '100ms' }}>
                                 <img 
-                                    src="https://images.unsplash.com/photo-1521336575822-6da63fb45455?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
+                                    src="../../Footer-Section-Image.jpg" 
                                     alt="Mountain road with cyclist" 
                                     className="w-full h-full object-cover"
                                 />
@@ -603,7 +640,7 @@ function Home() {
                             {/* Bottom Card - Coastal View */}
                             <div className="relative rounded-lg overflow-hidden shadow-lg" data-animate="slide-up" style={{ animationDelay: '200ms' }}>
                                 <img 
-                                    src="https://plus.unsplash.com/premium_photo-1732738372704-317ff6db9a7c?q=80&w=1231&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
+                                    src="https://plus.unsplash.com/premium_photo-1718146019167-110481171ad2?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
                                     alt="Coastal cliffs" 
                                     className="w-full h-full object-cover"
                                 />

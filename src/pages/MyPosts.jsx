@@ -246,10 +246,10 @@ function MyPosts() {
             <Container>
                 <div className="mb-12">
                     <h2 className="text-3xl font-bold text-primary-dark dark:text-secondary-white mb-4">
-                        My Posts
+                        My Blogs
                     </h2>
                     <p className="text-lg text-secondary-darkGray dark:text-secondary-mediumGray">
-                        Manage and view all your published blog posts.
+                        Manage and view all your published blog.
                     </p>
                 </div>
                 
@@ -288,7 +288,7 @@ function MyPosts() {
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                             </svg>
-                            New Post
+                            New Blog
                         </button>
                     </div>
                 </div>
@@ -326,20 +326,20 @@ function MyPosts() {
                     <div className="text-center py-16">
                         <h2 className="text-3xl font-bold text-primary-dark dark:text-secondary-white mb-6" data-animate="fade-in">
                             {selectedCategory === 'All' 
-                                ? 'No Posts Yet' 
-                                : `No Posts in ${selectedCategory} Category`}
+                                ? 'No Blogs Yet' 
+                                : `No Blogs in ${selectedCategory} Category`}
                         </h2>
                         <p className="text-lg text-secondary-darkGray dark:text-secondary-mediumGray mb-8 max-w-2xl mx-auto" data-animate="slide-up">
                             {selectedCategory === 'All' 
-                                ? 'You haven\'t created any posts yet. Start sharing your stories!' 
-                                : `You don't have any posts in the ${selectedCategory} category yet.`}
+                                ? 'You haven\'t created any blogs yet. Start sharing your stories!' 
+                                : `You don't have any blogs in the ${selectedCategory} category yet.`}
                         </p>
                         <Link 
                             to="/add-post" 
                             className="inline-flex items-center px-6 py-3 bg-accent-blue text-secondary-white font-semibold rounded-lg shadow-md hover:bg-accent-teal transition-colors duration-300"
                             data-animate="slide-up"
                         >
-                            Create Your First Post
+                            Create Your First Blog
                         </Link>
                     </div>
                 ) : (
@@ -374,7 +374,7 @@ function MyPosts() {
                                 onClick={forceRefresh}
                                 className="inline-flex items-center px-6 py-3 border border-accent-blue text-accent-blue dark:text-accent-blue font-semibold rounded-lg hover:bg-accent-blue hover:text-secondary-white transition-colors duration-300"
                             >
-                                Refresh Posts
+                                Refresh Blog
                             </button>
                         </div>
                     </>

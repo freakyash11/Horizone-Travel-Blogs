@@ -86,7 +86,7 @@ function AllPosts() {
             <Container>
                 <div className="mb-12">
                     <h2 className="text-3xl font-bold text-primary-dark dark:text-secondary-white mb-4">
-                        All Posts
+                        All Blogs
                     </h2>
                     <p className="text-lg text-secondary-darkGray dark:text-secondary-mediumGray">
                         Discover a collection of travel stories, tips, and destination guides.
@@ -172,7 +172,7 @@ function AllPosts() {
                                 onClick={forceRefresh}
                                 className="inline-flex items-center px-6 py-3 border border-accent-blue text-accent-blue dark:text-accent-blue font-semibold rounded-lg hover:bg-accent-blue hover:text-secondary-white transition-colors duration-300"
                             >
-                                Refresh Posts
+                                Refresh Blogs
                             </button>
                         </div>
                     </>
