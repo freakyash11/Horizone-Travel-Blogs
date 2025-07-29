@@ -93,7 +93,8 @@ function PostCard({$id, title, featuredImage, content, $createdAt, category, use
             
             setAuthor({
               name: userName,
-              avatar: authorConfig.defaultImages[avatarIndex]
+              avatar: defaultAvatar
+              //authorConfig.defaultImages[avatarIndex]
             });
             return;
           }
