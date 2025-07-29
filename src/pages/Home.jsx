@@ -180,18 +180,25 @@ function Home() {
         avatar: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24'%3E%3Cpath fill='%23ccc' d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'%3E%3C/path%3E%3C/svg%3E"
     });
     
-    // Profile images for users
-    const profileImages = [
-      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1568602471122-7832951cc4c5?q=80&w=200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=200&auto=format&fit=crop", 
-      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=200&auto=format&fit=crop"
-    ];
+    // Profile image configuration
+    const authorConfig = {
+        yashProfile: {
+            name: "Yash Singh Kuwarbi",
+            // Using proper path for deployment
+            avatar: "/prof.jpg" // Make sure this image exists in your public folder
+        },
+        defaultImages: [
+            "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=200&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=200&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1568602471122-7832951cc4c5?q=80&w=200&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=200&auto=format&fit=crop", 
+            "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=200&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=200&auto=format&fit=crop"
+        ]
+    };
     
     // Fallback names for when user name is not available
     const fallbackNames = ["John Doe", "Jane Smith", "Alex Johnson", "Sam Wilson", "Taylor Swift", "Morgan Freeman", "Chris Evans", "Emma Watson", "Robert Downey"];
@@ -206,25 +213,26 @@ function Home() {
                 
                 // Generate a consistent hash from the user's ID for deterministic avatar selection
                 const userIdHash = userId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-                const avatarIndex = userIdHash % profileImages.length;
+                const avatarIndex = userIdHash % authorConfig.defaultImages.length;
                 
                 // Try to get the user profile using the getUserProfile method
                 const userProfile = await authService.getUserProfile(userId);
+                console.log("Fetched user profile:", userProfile); // Add logging
                 
                 if (userProfile && userProfile.name) {
-                    // If we found a user profile, use the real name
+                    // If we found a user profile with a valid name
                     const userName = userProfile.name;
                     
-                    // Check if the user is Yash Singh Kuwarbi and use the specific image from public folder
-                    if (userName === "Yash Singh Kuwarbi") {
+                    // Check if the user is Yash Singh Kuwarbi
+                    if (userName === authorConfig.yashProfile.name) {
                         setFeaturedAuthor({
                             name: userName,
-                            avatar: "/WhatsApp Image 2025-07-21 at 15.07.29_ff90baa4.jpg"
+                            avatar: authorConfig.yashProfile.avatar
                         });
                     } else {
                         setFeaturedAuthor({
                             name: userName,
-                            avatar: profileImages[avatarIndex]
+                            avatar: authorConfig.defaultImages[avatarIndex]
                         });
                     }
                     return;
@@ -233,20 +241,20 @@ function Home() {
                 // Fallback: Check if current user matches the post userId
                 const currentUser = await authService.getCurrentUser();
                 
-                if (currentUser && currentUser.$id === userId) {
-                    // If it's the current user, use their actual name
-                    const userName = currentUser.name || fallbackNames[avatarIndex];
+                if (currentUser && currentUser.$id === userId && currentUser.name) {
+                    // If it's the current user and has a name, use their actual name
+                    const userName = currentUser.name;
                     
-                    // Check if the user is Yash Singh Kuwarbi and use the specific image from public folder
-                    if (userName === "Yash Singh Kuwarbi") {
+                    // Check if the user is Yash Singh Kuwarbi
+                    if (userName === authorConfig.yashProfile.name) {
                         setFeaturedAuthor({
                             name: userName,
-                            avatar: "/WhatsApp Image 2025-07-21 at 15.07.29_ff90baa4.jpg"
+                            avatar: authorConfig.yashProfile.avatar
                         });
                     } else {
                         setFeaturedAuthor({
                             name: userName,
-                            avatar: profileImages[avatarIndex]
+                            avatar: authorConfig.defaultImages[avatarIndex]
                         });
                     }
                 } else {
@@ -255,15 +263,15 @@ function Home() {
                     const userName = fallbackNames[fallbackIndex];
                     
                     // Check if the generated name is Yash Singh Kuwarbi
-                    if (userName === "Yash Singh Kuwarbi") {
+                    if (userName === authorConfig.yashProfile.name) {
                         setFeaturedAuthor({
                             name: userName,
-                            avatar: "/WhatsApp Image 2025-07-21 at 15.07.29_ff90baa4.jpg"
+                            avatar: authorConfig.yashProfile.avatar
                         });
                     } else {
                         setFeaturedAuthor({
                             name: userName,
-                            avatar: profileImages[avatarIndex]
+                            avatar: authorConfig.defaultImages[avatarIndex]
                         });
                     }
                 }
@@ -272,13 +280,22 @@ function Home() {
                 // Use fallback in case of error
                 const userId = featuredPost.userId;
                 const userIdHash = userId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-                const avatarIndex = userIdHash % profileImages.length;
+                const avatarIndex = userIdHash % authorConfig.defaultImages.length;
                 const fallbackIndex = userIdHash % fallbackNames.length;
                 
-                setFeaturedAuthor({
-                    name: fallbackNames[fallbackIndex],
-                    avatar: profileImages[avatarIndex]
-                });
+                // Ensure we're using the correct author configuration
+                const userName = fallbackNames[fallbackIndex];
+                if (userName === authorConfig.yashProfile.name) {
+                    setFeaturedAuthor({
+                        name: userName,
+                        avatar: authorConfig.yashProfile.avatar
+                    });
+                } else {
+                    setFeaturedAuthor({
+                        name: userName,
+                        avatar: authorConfig.defaultImages[avatarIndex]
+                    });
+                }
             }
         };
         
@@ -367,7 +384,17 @@ function Home() {
                                                                 alt={featuredAuthor.name}
                                                                 className="w-10 h-10 rounded-full object-cover border-2 border-secondary-white"
                                                                 onError={(e) => {
-                                                                    e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24'%3E%3Cpath fill='%23ccc' d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'%3E%3C/path%3E%3C/svg%3E";
+                                                                    console.log("Avatar image failed to load:", featuredAuthor.avatar);
+                                                                    // Try to use a default image based on the user's ID hash
+                                                                    const userId = post?.userId;
+                                                                    if (userId) {
+                                                                        const userIdHash = userId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+                                                                        const avatarIndex = userIdHash % authorConfig.defaultImages.length;
+                                                                        e.target.src = authorConfig.defaultImages[avatarIndex];
+                                                                    } else {
+                                                                        // If no userId, use the first default image
+                                                                        e.target.src = authorConfig.defaultImages[0];
+                                                                    }
                                                                 }}
                                                             />
                                                             <span className="text-secondary-white font-medium ml-2">{featuredAuthor.name}</span>

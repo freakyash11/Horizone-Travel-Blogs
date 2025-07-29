@@ -5,19 +5,24 @@ import conf from "../conf/conf.js"
 import authService from "../appwrite/auth"
 import { LikeButton } from './'
 
-// Profile images for users
-const profileImages = [
-  
-  "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=200&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=200&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1568602471122-7832951cc4c5?q=80&w=200&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=200&auto=format&fit=crop", 
-  "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=200&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=200&auto=format&fit=crop"
-];
+// Author configuration
+const authorConfig = {
+    yashProfile: {
+        name: "Yash Singh Kuwarbi",
+        avatar: "/prof.jpg" // Make sure this image exists in your public folder
+    },
+    defaultImages: [
+        "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=200&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=200&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1568602471122-7832951cc4c5?q=80&w=200&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=200&auto=format&fit=crop", 
+        "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=200&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=200&auto=format&fit=crop"
+    ]
+};
 
 // Fallback names for when user name is not available
 const fallbackNames = ["John Doe", "Jane Smith", "Alex Johnson", "Sam Wilson", "Taylor Swift", "Morgan Freeman", "Chris Evans", "Emma Watson", "Robert Downey"];
@@ -67,14 +72,28 @@ function PostCard({$id, title, featuredImage, content, $createdAt, category, use
     if (userId) {
       const fetchUserDetails = async () => {
         try {
-          // Try to get the user profile using the new getUserProfile method
+          // Generate a consistent hash from the user's ID for deterministic avatar selection
+          const userIdHash = userId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+          const avatarIndex = userIdHash % authorConfig.defaultImages.length;
+
+          // Try to get the user profile using the getUserProfile method
           const userProfile = await authService.getUserProfile(userId);
           
           if (userProfile && userProfile.name) {
-            // If we found a user profile, use the real name
+            const userName = userProfile.name;
+            
+            // Check if the user is Yash Singh Kuwarbi
+            if (userName === authorConfig.yashProfile.name) {
+              setAuthor({
+                name: userName,
+                avatar: authorConfig.yashProfile.avatar
+              });
+              return;
+            }
+            
             setAuthor({
-              name: userProfile.name,
-              avatar: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24'%3E%3Cpath fill='%23ccc' d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'%3E%3C/path%3E%3C/svg%3E" // You can add profile pictures to user profiles later
+              name: userName,
+              avatar: authorConfig.defaultImages[avatarIndex]
             });
             return;
           }
@@ -82,55 +101,58 @@ function PostCard({$id, title, featuredImage, content, $createdAt, category, use
           // Fallback: Check if current user matches the post userId
           const currentUser = await authService.getCurrentUser();
           
-          // Generate a consistent hash from the user's ID for deterministic avatar selection
-          const userIdHash = userId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-          const avatarIndex = userIdHash % profileImages.length;
-          
-          if (currentUser && currentUser.$id === userId) {
-            // If it's the current user, use their actual name
-            const userName = currentUser.name || fallbackNames[avatarIndex];
+          if (currentUser && currentUser.$id === userId && currentUser.name) {
+            const userName = currentUser.name;
             
-            // Check if the user is Yash Singh Kuwarbi and use the specific image from public folder
-            if (userName === "Yash Singh Kuwarbi") {
+            // Check if the user is Yash Singh Kuwarbi
+            if (userName === authorConfig.yashProfile.name) {
               setAuthor({
                 name: userName,
-                avatar: "/WhatsApp Image 2025-07-21 at 15.07.29_ff90baa4.jpg"
+                avatar: authorConfig.yashProfile.avatar
               });
             } else {
               setAuthor({
                 name: userName,
-                avatar: profileImages[avatarIndex]
+                avatar: authorConfig.defaultImages[avatarIndex]
               });
             }
           } else {
-            // Use deterministic approach for users we can't directly fetch
+            // Use a deterministic fallback based on userId
             const fallbackIndex = userIdHash % fallbackNames.length;
             const userName = fallbackNames[fallbackIndex];
             
             // Check if the generated name is Yash Singh Kuwarbi
-            if (userName === "Yash Singh Kuwarbi") {
+            if (userName === authorConfig.yashProfile.name) {
               setAuthor({
                 name: userName,
-                avatar: "/WhatsApp Image 2025-07-21 at 15.07.29_ff90baa4.jpg"
+                avatar: authorConfig.yashProfile.avatar
               });
             } else {
               setAuthor({
                 name: userName,
-                avatar: profileImages[avatarIndex]
+                avatar: authorConfig.defaultImages[avatarIndex]
               });
             }
           }
         } catch (error) {
-          console.log("Error fetching user details:", error);
-          // In case of error, use a deterministic fallback
-          const userIdHash = (userId?.length || 0) + (userId?.split('') || []).reduce((acc, char) => acc + char.charCodeAt(0), 0);
-          const avatarIndex = userIdHash % profileImages.length;
+          console.error("Error fetching user details:", error);
+          // Use deterministic fallback in case of error
+          const userIdHash = userId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+          const avatarIndex = userIdHash % authorConfig.defaultImages.length;
           const fallbackIndex = userIdHash % fallbackNames.length;
+          const userName = fallbackNames[fallbackIndex];
           
-          setAuthor({
-            name: fallbackNames[fallbackIndex],
-            avatar: profileImages[avatarIndex] || defaultAvatar
-          });
+          if (userName === authorConfig.yashProfile.name) {
+            setAuthor({
+              name: userName,
+              avatar: authorConfig.yashProfile.avatar
+            });
+          } else {
+            setAuthor({
+              name: userName,
+              avatar: authorConfig.defaultImages[avatarIndex]
+            });
+          }
         }
       };
       
@@ -138,20 +160,20 @@ function PostCard({$id, title, featuredImage, content, $createdAt, category, use
     } else {
       // If no userId, use a deterministic approach based on post ID
       const postIdHash = $id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-      const avatarIndex = postIdHash % profileImages.length;
+      const avatarIndex = postIdHash % authorConfig.defaultImages.length;
       const fallbackIndex = postIdHash % fallbackNames.length;
       const userName = fallbackNames[fallbackIndex];
       
       // Check if the generated name is Yash Singh Kuwarbi
-      if (userName === "Yash Singh Kuwarbi") {
+      if (userName === authorConfig.yashProfile.name) {
         setAuthor({
           name: userName,
-          avatar: "/WhatsApp Image 2025-07-21 at 15.07.29_ff90baa4.jpg"
+          avatar: authorConfig.yashProfile.avatar
         });
       } else {
         setAuthor({
           name: userName,
-          avatar: profileImages[avatarIndex] || defaultAvatar
+          avatar: authorConfig.defaultImages[avatarIndex]
         });
       }
     }
@@ -261,7 +283,20 @@ function PostCard({$id, title, featuredImage, content, $createdAt, category, use
               alt={author.name}
               className='w-8 h-8 rounded-full object-cover'
               onError={(e) => {
-                e.target.src = defaultAvatar;
+                console.log("Avatar image failed to load:", author.avatar);
+                // Try to use a default image based on the user's ID hash
+                if (userId) {
+                  const userIdHash = userId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+                  const avatarIndex = userIdHash % authorConfig.defaultImages.length;
+                  e.target.src = authorConfig.defaultImages[avatarIndex];
+                } else if ($id) {
+                  const postIdHash = $id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+                  const avatarIndex = postIdHash % authorConfig.defaultImages.length;
+                  e.target.src = authorConfig.defaultImages[avatarIndex];
+                } else {
+                  // If no IDs available, use the first default image
+                  e.target.src = authorConfig.defaultImages[0];
+                }
               }}
             />
             <span className='ml-2 text-sm font-medium text-primary-dark dark:text-secondary-white'>{author.name}</span>
