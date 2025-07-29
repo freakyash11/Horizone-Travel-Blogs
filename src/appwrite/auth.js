@@ -84,23 +84,60 @@ export class AuthService {
     
     async getUserProfile(userId) {
         try {
-            // Query the users collection to find the profile that matches this userId
+            if (!userId) {
+                console.log("No userId provided to getUserProfile");
+                return null;
+            }
+
+            // Add some logging to debug the values being used
+            console.log("Fetching user profile with:", {
+                databaseId: conf.appwriteDatabaseId,
+                collectionId: conf.appwriteUsersCollectionId,
+                userId: userId
+            });
+
+            // First try to get the document directly if we have a document ID
+            try {
+                const directProfile = await this.databases.getDocument(
+                    conf.appwriteDatabaseId,
+                    conf.appwriteUsersCollectionId,
+                    userId
+                );
+                if (directProfile) {
+                    console.log("Found user profile directly:", directProfile);
+                    return directProfile;
+                }
+            } catch (directError) {
+                console.log("Direct profile fetch failed, trying listDocuments...");
+            }
+
+            // Fallback to listDocuments if direct fetch fails
             const response = await this.databases.listDocuments(
                 conf.appwriteDatabaseId,
                 conf.appwriteUsersCollectionId,
-                [Query.equal("userId", userId)]
+                [Query.equal("userId", [userId])]
             );
             
-            if (response && response.documents && response.documents.length > 0) {
-                console.log("User profile found:", response.documents[0]);
+            if (response?.documents?.length > 0) {
+                console.log("User profile found via list:", response.documents[0]);
                 return response.documents[0];
             }
             
             console.log("No user profile found for userId:", userId);
-            return null;
+            // Return a default profile instead of null
+            return {
+                name: "Anonymous User",
+                email: "",
+                userId: userId
+            };
         } catch (error) {
             console.error("Get user profile error:", error);
-            return null;
+            // Return a default profile instead of null
+            return {
+                name: "Anonymous User",
+                email: "",
+                userId: userId
+            };
         }
     }
     
