@@ -7,6 +7,7 @@ const conf = {
     tinymceApiKey: String(import.meta.env.VITE_TINYMCE_API_KEY || ''),
     appwriteUsersCollectionId: String(import.meta.env.VITE_APPWRITE_USERS_COLLECTION_ID || 'users'),
     appwriteStatsCollectionId: String(import.meta.env.VITE_APPWRITE_STATS_COLLECTION_ID || 'stats'),
+    appwriteGeminiApiKey: String(import.meta.env.VITE_APP_GEMINI_API_KEY || ''),
 }
 // there was a name issue with the import.meta.env.VITE_APPWRITE_URL, it was later fixed in debugging video
 

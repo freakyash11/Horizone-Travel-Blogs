@@ -13,13 +13,22 @@ export default function RTE({ name, control, label, defaultValue = "", onChange 
       const fileUpload = await appwriteService.uploadFile(file);
       
       if (fileUpload) {
-        const fileUrl = appwriteService.getFilePreview(fileUpload.$id);
-        return fileUrl.toString();
+        // Generate direct URL from Appwrite
+        const fileUrl = `${conf.appwriteUrl}/storage/buckets/${conf.appwriteBucketId}/files/${fileUpload.$id}/view?project=${conf.appwriteProjectId}`;
+        console.log('Uploaded image URL:', fileUrl); // Debug log
+        return fileUrl;
       }
       throw new Error('Failed to upload image');
     } catch (error) {
       console.error('Image upload failed:', error);
-      return Promise.reject({ message: 'Image upload failed', remove: true });
+      // Show more detailed error message
+      const errorMessage = error.message || 'Image upload failed';
+      console.log('Upload error details:', {
+        message: errorMessage,
+        response: error.response,
+        code: error.code
+      });
+      return Promise.reject({ message: errorMessage, remove: true });
     }
   };
 
@@ -78,6 +87,15 @@ export default function RTE({ name, control, label, defaultValue = "", onChange 
               automatic_uploads: true,
               image_advtab: true,
               image_caption: true,
+              // Additional image settings
+              image_dimensions: true,
+              image_class_list: [
+                { title: 'Responsive', value: 'img-fluid' },
+                { title: 'Full Width', value: 'w-full' }
+              ],
+              images_reuse_filename: true,
+              images_upload_credentials: true,
+              images_upload_base_path: `${conf.appwriteUrl}/storage/buckets/${conf.appwriteBucketId}/files/`,
               // Other useful settings
               paste_data_images: true,
               smart_paste: true,
