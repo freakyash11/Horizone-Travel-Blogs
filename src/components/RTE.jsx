@@ -1,11 +1,24 @@
-import React from 'react'
+import React, { useRef } from 'react'
 import { Editor } from '@tinymce/tinymce-react';
 import { Controller } from 'react-hook-form';
 import appwriteService from "../appwrite/config";
-import { ID } from 'appwrite';
 import conf from '../conf/conf';
+import { useAIContentGenerator } from '../hooks/useAIContentGenerator';
+import { AIGeneratorModal } from './AIGeneratorModal';
 
 export default function RTE({ name, control, label, defaultValue = "", onChange }) {
+  const editorRef = useRef(null);
+  
+  // AI Content Generator Hook
+  const {
+    isGenerating,
+    showAIModal,
+    setShowAIModal,
+    prompt,
+    setPrompt,
+    generateContent
+  } = useAIContentGenerator();
+
   // Function to handle image upload
   const handleImageUpload = async (blobInfo) => {
     try {
@@ -32,9 +45,28 @@ export default function RTE({ name, control, label, defaultValue = "", onChange 
     }
   };
 
+  // Handle AI content generation
+  const handleAIGenerate = () => {
+    generateContent(editorRef.current);
+  };
+
   return (
     <div className='w-full'> 
-      {label && <label className='inline-block mb-1 pl-1'>{label}</label>}
+      {label && (
+        <div className="flex items-center justify-between mb-1">
+          <label className='inline-block pl-1 font-medium text-gray-700'>{label}</label>
+          <button
+            type="button"
+            onClick={() => setShowAIModal(true)}
+            className="flex items-center px-3 py-1.5 bg-gradient-to-r from-blue-500 to-purple-600 text-white text-sm rounded-md hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-sm font-medium"
+          >
+            <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            Generate with AI
+          </button>
+        </div>
+      )}
 
       <Controller
         name={name || "content"}
@@ -42,6 +74,7 @@ export default function RTE({ name, control, label, defaultValue = "", onChange 
         render={({ field: { onChange: fieldOnChange, value } }) => (
           <Editor
             apiKey={conf.tinymceApiKey} // Add your API key in conf.js
+            onInit={(evt, editor) => editorRef.current = editor}
             initialValue={defaultValue}
             value={value}
             init={{
@@ -60,7 +93,7 @@ export default function RTE({ name, control, label, defaultValue = "", onChange 
                 'bold italic underline strikethrough | forecolor backcolor | ' +
                 'alignleft aligncenter alignright alignjustify | ' +
                 'bullist numlist outdent indent | link image media | ' +
-                'removeformat codesample emoticons | help',
+                'removeformat codesample emoticons | aiGenerate | help',
               content_style: `
                 body { 
                   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
@@ -140,6 +173,13 @@ export default function RTE({ name, control, label, defaultValue = "", onChange 
                 'https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap',
               ],
               setup: (editor) => {
+                // Add AI Generate button to toolbar
+                editor.ui.registry.addButton('aiGenerate', {
+                  text: 'AI',
+                  tooltip: 'Generate content with AI',
+                  onAction: () => setShowAIModal(true)
+                });
+
                 editor.on('init', () => {
                   // Add custom CSS to the editor
                   editor.dom.addStyle(`
@@ -178,7 +218,16 @@ export default function RTE({ name, control, label, defaultValue = "", onChange 
           />
         )}
       />
+
+      {/* AI Generator Modal */}
+      <AIGeneratorModal
+        showAIModal={showAIModal}
+        setShowAIModal={setShowAIModal}
+        prompt={prompt}
+        setPrompt={setPrompt}
+        onGenerate={handleAIGenerate}
+        isGenerating={isGenerating}
+      />
     </div>
   )
 }
-
