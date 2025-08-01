@@ -305,7 +305,7 @@ function Post() {
                     )}
 
                     {/* Post Content */}
-                    <div className="prose prose-lg dark:prose-invert max-w-none">
+                    <div className="prose prose-lg dark:prose-invert max-w-none [&>*]:text-left [&>*]:mx-0">
                         <h1 className="text-4xl font-bold mb-6 text-primary-dark dark:text-secondary-white leading-tight">{post.title}</h1>
                         
                         {/* Post metadata with author, date, and now like button */}
